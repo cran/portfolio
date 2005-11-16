@@ -1,0 +1,37 @@
+export(weight
+       )
+
+exportClasses("portfolioBasic",
+              "portfolio",
+              "objectHistory",
+              "exposure",
+              "exposureHistory",
+              "performance",
+              "performanceHistory",
+              "contribution",
+              "contributionHistory",
+              "portfolioHistory"
+              )
+
+exportMethods(
+              show,
+              summary,
+              mean,
+
+              initialize,
+              create,
+              calcWeights,
+              calcShares,
+              scaleWeights,
+
+              balance,
+              exposure,
+              performance,
+              contribution,
+
+              add,
+              
+              portfolioDiff,
+              securityInfo
+              )
+
