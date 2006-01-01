@@ -9,18 +9,6 @@
 setMethod("show",
           signature(object = "performance"),
           function(object){
-            cat(paste("An object of class \"", class(object), "\"\n", sep = ""))
-            if(length(object@ret) > 0)
-              cat(paste("ret: ", round(object@ret, 4), "\n"))
-            cat("ret.detail (at most 10 records):\n")
-            show(object@ret.detail[1:min(10, nrow(object@ret.detail)),])
-          }
-          )
-
-setMethod("summary",
-          signature(object = "performance"),
-          function(object){
-            cat("Performance summary:\n\n")
             if(length(object@ret) > 0){
 
               ret <- object@ret
@@ -44,7 +32,40 @@ setMethod("summary",
               }
             }
             else{
-              cat("No data.\n")
+              cat("Object of class performance with no return data.\n")
+            }
+          }
+          )
+
+setMethod("summary",
+          signature(object = "performance"),
+          function(object){
+            show(object)
+          }
+          )
+
+setMethod("plot",
+          signature(x = "performance", y = "missing"),
+          function(x){
+            ret <- x@ret
+            ret.tag  <- ifelse(abs(ret) > 0.01, "%", "bps")
+            ret <- ifelse(ret.tag == "%", ret * 100, ret * 100 * 100)
+            ret <- round(ret, digits = 2)
+
+            if(nrow(x@ret.detail) > 0){
+              y <- x@ret.detail
+              y <- y[order(y$contrib, na.last = NA),]
+              y$id <- factor(y$id, levels = unique(y$id))
+              if(nrow(y) > 10){
+                y <- rbind(head(y, n = 5),
+                           tail(y, n = 5))
+              }
+
+              print(barchart(id ~ contrib, data = y, origin = 0, main = paste("Performance: ", ret, ret.tag, sep = "")))
+                             
+            }
+            else{
+              stop("Nothing to plot")
             }
           }
           )

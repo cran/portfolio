@@ -27,8 +27,11 @@ setMethod("initialize",
 setMethod("create",
           "portfolioBasic",
           function(object, ...){
-            if(length(object@in.var) != 1){
-              stop("Must specify single in.var to create portfolio")
+            if(length(object@in.var) == 0){
+              return(object)
+            }
+            else if(length(object@in.var) > 1){
+              stop("Only one in.var is allowed.")
             }
 
             ## Both id and in.var must be present in the data slot.
@@ -51,8 +54,23 @@ setMethod("create",
                                      object@size, object@sides,
                                      object@weight.var)
 
-            object@weights <- input[!is.na(input$weight),][c("id", "weight")]
+            input <- input[!is.na(input$weight),][c("id", "weight")]
             
+            ## Apply min/max weights from the weight.range slot.
+
+            min.weight <- object@weight.range[1]
+            max.weight <- object@weight.range[2]
+            
+            input$weight[abs(input$weight) < min.weight] <-
+              sign(input$weight[abs(input$weight) < min.weight]) * min.weight
+
+            if(is.finite(max.weight)){
+              input$weight[abs(input$weight) > max.weight] <-
+                sign(input$weight[abs(input$weight) > max.weight]) * max.weight
+            }
+
+            object@weights <- input
+                                  
             show(object)
             invisible(object)
           }
@@ -217,7 +235,7 @@ setMethod("summary",
 
             if(length(object@symbol.var > 1) &&
                object@symbol.var %in% names(x)){
-              rn <- ifelse(is.na(x[[object@symbol.var]]), x$id, x[[object@symbol.var]])
+              rn <- ifelse(is.na(x[[object@symbol.var]]), x$id, as.character(x[[object@symbol.var]]))
               if(length(unique(rn)) == length(rn)){
                 row.names(x) <- rn
               }
@@ -402,8 +420,7 @@ setMethod("exposure",
             }
 
             exp.obj <- new("exposure", data = all.exp)
-            show(exp.obj)
-            invisible(exp.obj)
+            exp.obj
           }
           )
 
@@ -453,7 +470,7 @@ setMethod("performance",
             object@weights <- x[c("id","weight")]
             perf@t.plus.one <- object
 
-            invisible(perf)
+            perf
           }
           )
 
@@ -536,13 +553,14 @@ setMethod("contribution",
                 
                 a <- a[c(which("rank" == names(a)),
                          which("rank" != names(a)))]
+
               }
+
               result[[att]] <- a
             }
 
             contrib.obj <- new("contribution", data = result)
-            show(contrib.obj)
-            invisible(contrib.obj)
+            contrib.obj
           }
           )
 
@@ -607,3 +625,144 @@ setMethod("portfolioDiff",
             
           }
           )
+
+setMethod("plot",
+          signature(x = "portfolioBasic", y = "missing"),
+          function(x){
+            stopifnot(length(x@in.var) == 1 && x@in.var %in% names(x@data))
+
+            grid.newpage()
+            pushViewport(viewport(layout = grid.layout(2, 1)))
+            pushViewport(viewport(layout.pos.row = 1))
+
+            y <- merge(x@data, x@weights, by = "id")
+            
+            ## Plot weight vs. in.var values.
+
+            print(xyplot(y$weight ~ y[[x@in.var]],
+                         main = "Weight vs. in.var",
+                         xlab = paste(x@in.var, "(in.var)"),
+                         ylab = "weight"), newpage = FALSE)
+            
+            popViewport(1)
+            pushViewport(viewport(layout.pos.row = 2))
+
+            ## Plot a histogram of weights.
+            
+            print(histogram(~ y$weight,
+                            main = "Weight distribution",
+                            xlab = "weight",
+                            ylab = "count"), newpage = FALSE)
+
+            popViewport(1)
+            
+          }
+          )
+
+setMethod("matching",
+          signature(object = "portfolioBasic", covariates = "character"),
+          function(object, covariates, method = "nearest", ...){
+
+            if (!("MatchIt" %in% .packages(all = TRUE)))
+              install.packages("MatchIt")
+            require(MatchIt)
+
+            if(nrow(object@weights) == 0){
+              stop("Cannot calling matching on a portfolio with no positions")
+            }
+            
+            x <- merge(object@data, object@weights, by = "id", all = TRUE)
+            x$treatment.weight <- x$weight
+            x$treatment        <- !is.na(x$treatment.weight)
+
+            f <- formula(paste("treatment ~", paste(covariates, collapse = "+")))
+            m <- matchit(f, data = x, method = method, discard = "both", ...)
+
+            ## The match.matrix result provides a mapping from
+            ## treatment to control securities, by means of a
+            ## row.names mapping using row.names(x).
+
+            id.map <- data.frame(old = x[row.names(m$match.matrix),]$id,
+                                 new = x[m$match.matrix,]$id)
+
+            new.weights <- object@weights
+            new.weights$id <- id.map$new[match(new.weights$id, id.map$old)]
+
+            object@weights <- new.weights
+            invisible(object)
+          }
+          )
+
+setMethod("+",
+          signature(e1 = "portfolioBasic", e2 = "portfolioBasic"),
+          function(e1, e2){
+
+            ## We could spend a lot of time figuring out the correct
+            ## value for each slot in the sum.  For now, though,
+            ## arithmetic operators will return a portfolio object of
+            ## the simplest form.
+            
+            r <- new("portfolioBasic", type = "unknown", size = "unknown")
+
+            stopifnot(e1@id.var == e2@id.var)
+            r@id.var <- e1@id.var
+
+            stopifnot(e1@symbol.var == e2@symbol.var)
+            r@symbol.var <- e1@symbol.var
+
+            stopifnot(e1@ret.var == e2@ret.var)
+            r@ret.var <- e1@ret.var
+            
+            if(nrow(e1@weights) == 0 && nrow(e2@weights) == 0){
+              return(r)
+            }
+            else if(nrow(e1@weights) == 0){
+              r@data    <- e2@data
+              r@weights <- e2@weights
+              return(r)
+            }
+            else if(nrow(e2@weights) == 0){
+              r@data    <- e1@data
+              r@weights <- e1@weights
+              return(r)
+            }
+            else{
+
+              ## Currently, we allow NA weights in the weights slot of
+              ## portfolioBasic.  To make matters simpler here, the
+              ## portfolio sum includes a weight for a security iff
+              ## the security has a non-na weight in at least one of
+              ## the addends.
+
+              w <- merge(subset(e1@weights, !is.na(weight)),
+                         subset(e2@weights, !is.na(weight)),
+                         suffixes = c(".e1", ".e2"), by = "id", all = TRUE)
+
+
+              w$weight.e1[is.na(w$weight.e1)] <- 0
+              w$weight.e2[is.na(w$weight.e2)] <- 0
+              
+              w$weight <- w$weight.e1 + w$weight.e2
+              r@weights <- w[c("id","weight")]
+
+              ## The data slot in the sum portfolio needs to include a
+              ## row for each security in the set union of securities
+              ## in the two argument portfolios' data slots.
+
+              ## At some point I should devise a way of performing
+              ## validity checks for all arithmetic operators.  For
+              ## instance, for binary operators that take two
+              ## portfolioBasic objects, the data slots must contain
+              ## data frames with the same columns.
+
+              if(!setequal(names(e1@data), names(e2@data))){
+                stop("portfolioBasic object must contain data slots with the same columns")
+              }
+              
+              d <- rbind(e1@data, subset(e2@data, ! id %in% e1@data$id))
+              r@data <- d
+              return(r)
+            }
+          }
+          )
+          

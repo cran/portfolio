@@ -14,7 +14,7 @@ weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FA
   ## Does x have the in.var in question?
 
   stopifnot(in.var %in% names(x))
-  stopifnot(class(x[[in.var]]) == "numeric")
+  stopifnot(is.numeric(x[[in.var]]))
   
   ## Figure out what type we're working with
   
@@ -69,7 +69,7 @@ weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FA
     ## Are there enough values in in.var to go around?
 
     side.denom <- ifelse(all(c("long","short") %in% sides), 2, 1)
-    if(size > floor(sum(!is.na(x[[in.var]])) / side.denom)){
+    if(type != "relative" && size > floor(sum(!is.na(x[[in.var]])) / side.denom)){
       stop("Size too large for the number of non-na ranks")
     }
     
@@ -82,42 +82,45 @@ weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FA
     cat("Creating", type, "weights using size", size,
         "from", sum(!is.na(x[[in.var]])), "candidates\n")
   }
+
+  if(type != "relative"){
   
-  ## NA out those outside of the size range.
-  
-  x$r <- rank(x[[in.var]], na.last = "keep", ties.method = "first")
-  is.na(x[[in.var]]) <- ! (x$r <= size | max(x$r, na.rm = TRUE) - size < x$r)
+    ## NA out those outside of the size range.
+    
+    x$r <- rank(x[[in.var]], na.last = "keep", ties.method = "first")
+    is.na(x[[in.var]]) <- ! (x$r <= size | max(x$r, na.rm = TRUE) - size < x$r)
 
 
-  ## The strategy for the rest of this function is to form weights as
-  ## if we were dealing with both the long and short sides.  A problem
-  ## arises, however, if there are fewer than twice the number of
-  ## non-na ranks and we want ranks for only one side.  To deal with
-  ## this, we add filler entries according to which single side we
-  ## want in the end.
+    ## The strategy for the rest of this function is to form weights as
+    ## if we were dealing with both the long and short sides.  A problem
+    ## arises, however, if there are fewer than twice the number of
+    ## non-na ranks and we want ranks for only one side.  To deal with
+    ## this, we add filler entries according to which single side we
+    ## want in the end.
 
-  x$orig <- TRUE
-  num.to.fill <- size * 2 - sum(!is.na(x$r))
+    x$orig <- TRUE
+    num.to.fill <- size * 2 - sum(!is.na(x$r))
 
-  ## It should never happen that we have to perform a fill and we're
-  ## dealing with both long and short.  The num-non-na checks above
-  ## will catch this, but let's just be sure.
+    ## It should never happen that we have to perform a fill and we're
+    ## dealing with both long and short.  The num-non-na checks above
+    ## will catch this, but let's just be sure.
 
-  if(num.to.fill > 0 && length(sides) == 2){
-    stop("Something is wrong: shouldn't be filling if working on long and short sides")
+    if(num.to.fill > 0 && length(sides) == 2){
+      stop("Something is wrong: shouldn't be filling if working on long and short sides")
+    }
+    
+    if(num.to.fill > 0){
+      fill.val            <- ifelse(sides == "long", -Inf, Inf)
+      fill.rows           <- x[0,][1:num.to.fill,]
+      fill.rows[[in.var]] <- fill.val
+      fill.rows$orig      <- FALSE
+
+      x <- rbind(x, fill.rows)
+    }
+    
+    x$r <- rank(x[[in.var]], na.last = "keep", ties.method = "first")
   }
-  
-  if(num.to.fill > 0){
-    fill.val            <- ifelse(sides == "long", -Inf, Inf)
-    fill.rows           <- x[0,][1:num.to.fill,]
-    fill.rows[[in.var]] <- fill.val
-    fill.rows$orig      <- FALSE
-
-    x <- rbind(x, fill.rows)
-  }
-  
-  x$r <- rank(x[[in.var]], na.last = "keep", ties.method = "first")
-  
+    
   ## Construct relative weights for each formation type
   
 
@@ -206,17 +209,19 @@ weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FA
 
   ## Now that we've arrived at a set of relative weights, decompose
   ## any of the filler work we may have done, and remove weights that
-  ## aren't in line with our side directives (that's even OK if type
-  ## "relative" was specified with only one side).
+  ## aren't in line with our side directives.  Note that we don't do
+  ## any of this if we're working with relative weights to start.
 
-  x <- x[x$orig,]
+  if(type != "relative"){
+    x <- x[x$orig,]
 
-  if(length(sides) == 1){
-    if(sides == "long"){
-      is.na(x$rel.weight) <- x$rel.weight < 0
-    }
-    else if(sides == "short"){
-      is.na(x$rel.weight) <- x$rel.weight > 0
+    if(length(sides) == 1){
+      if(sides == "long"){
+        is.na(x$rel.weight) <- x$rel.weight < 0
+      }
+      else if(sides == "short"){
+        is.na(x$rel.weight) <- x$rel.weight > 0
+      }
     }
   }
   

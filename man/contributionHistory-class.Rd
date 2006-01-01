@@ -2,7 +2,9 @@
 \docType{class}
 \alias{contributionHistory-class}
 \alias{mean,contributionHistory-method}
+\alias{plot,contributionHistory,missing-method}
 \alias{show,contributionHistory-method}
+\alias{summary,contributionHistory-method}
 
 \title{Class "contributionHistory"}
 \description{A time series of objects of class "contribution".}
@@ -25,8 +27,12 @@ Class \code{"objectHistory"}, directly.
   \describe{
     \item{mean}{\code{signature(x = "contributionHistory")}: calculate the mean
       of the contributions in this object. }
+    \item{plot}{\code{signature(x = "contributionHistory", y = "missing")}: Plot
+      this object. }
     \item{show}{\code{signature(object = "contributionHistory")}: show the
       object, briefly. }
+    \item{summary}{\code{signature(object = "contributionHistory")}:
+      display a summary of this object. }
   }
 }
 \author{ Jeff Enos \email{jeff@kanecap.com}}

@@ -44,6 +44,9 @@ if(!isGeneric("mvLong"))
 if(!isGeneric("mvShort"))
   setGeneric("mvShort", function(object) standardGeneric("mvShort"))
 
+if(!isGeneric("matching"))
+  setGeneric("matching", function(object, covariates, ...) standardGeneric("matching"))
+
 ## Class portfolioHistory
 
 if(!isGeneric("add"))

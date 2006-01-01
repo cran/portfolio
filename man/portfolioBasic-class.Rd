@@ -1,11 +1,14 @@
 \name{portfolioBasic-class}
 \docType{class}
 \alias{portfolioBasic-class}
+\alias{+,portfolioBasic,portfolioBasic-method}
 \alias{balance,portfolioBasic,character-method}
 \alias{contribution,portfolioBasic,character-method}
 \alias{create,portfolioBasic-method}
 \alias{exposure,portfolioBasic,character-method}
+\alias{matching,portfolioBasic,character-method}
 \alias{performance,portfolioBasic-method}
+\alias{plot,portfolioBasic,missing-method}
 \alias{portfolioDiff,portfolioBasic,portfolioBasic-method}
 \alias{scaleWeights,portfolioBasic-method}
 \alias{show,portfolioBasic-method}
@@ -16,6 +19,7 @@
 \alias{contribution}
 \alias{create}
 \alias{exposure}
+\alias{matching}
 \alias{performance}
 \alias{portfolioDiff}
 \alias{scaleWeights}
@@ -67,6 +71,7 @@
 }
 \section{Methods}{
   \describe{
+    \item{+}{\code{signature(e1 = "portfolioBasic", e2 = "portfolioBasic")}}
     \item{balance}{\code{signature(object = "portfolioBasic", in.var = "character")}:
       balances the positions in portfolio \code{object} to be neutral to
     the categories specified by column \code{in.var} in the \code{data} slot.}
@@ -81,9 +86,17 @@
     \item{exposure}{\code{signature(object = "portfolioBasic", exp.var
 	= "character")}: returns one data.frame with
       exposure analysis for each element of \code{contrib.var}.  All
-    results are returned in a list. }
+      results are returned in a list. }
+    \item{matching}{\code{signature(object = "portfolioBasic",
+	covariates = "character")}:
+      returns a matching portfolio along the dimensions specified in the
+      character vector \code{covariates}.  This method requires the
+      MatchIt package; additional arguments to the \code{matchit}
+      function may be passed via \code{...}.}
     \item{performance}{\code{signature(object = "portfolioBasic")}:
-    returns a list containing performance results. }
+      returns a list containing performance results. }
+    \item{plot}{\code{signature(x = "portfolioBasic", y = "missing")}: Plot
+      this object. }
     \item{portfolioDiff}{\code{signature(object = "portfolioBasic", x =
 	"portfolioBasic")}: computes the difference, as a
       \code{portfolioBasic} object, between two portfolios. }
@@ -113,7 +126,7 @@ p <- new("portfolioBasic",
 summary(p)
 
 exposure(p, exp.var = c("price", "sector"))
-summary(performance(p))
+performance(p)
 contribution(p, contrib.var = c("cap.bil", "sector"))
 
 p <- new("portfolioBasic",
@@ -127,7 +140,7 @@ p <- new("portfolioBasic",
 summary(p)
 
 exposure(p, exp.var = c("price", "sector"))
-summary(performance(p))
+performance(p)
 contribution(p, contrib.var = c("cap.bil","sector"))
 }
 \keyword{classes}

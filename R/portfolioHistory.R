@@ -56,21 +56,10 @@ setMethod("summary",
           }
           )
 
-## Right now these three functions merely calculate and display some
-## useful information about the historical exposure, performance, and
-## contribution components of this object, but will be the subject of
-## non-trivial design modifications later on.  For instance, this
-## object should be storing three objects of class "objectHistory",
-## and return objects of class "exposureHistory",
-## "performanceHistory", and "contributionHistory".  These objects, in
-## turn, will include more slots to store summary information, such as
-## min/max exposures in "exposureHistory".
-
 setMethod("exposure",
           signature(object = "portfolioHistory"),
           function(object, exp.var = NULL){
-            cat("Mean exposure:\n")
-            summary(mean(object@exposure))
+            object@exposure
           }
           )
 
@@ -78,15 +67,14 @@ setMethod("performance",
           signature(object = "portfolioHistory"),
           function(object){
             object@performance@freq <- object@freq
-            summary(object@performance)
+            object@performance
           }
           )
 
 setMethod("contribution",
           signature(object = "portfolioHistory"),
           function(object, contrib.var = NULL){
-            cat("Mean contribution:\n")
-            summary(mean(object@contribution))
+            object@contribution
           }
           )        
           

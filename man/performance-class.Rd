@@ -1,6 +1,7 @@
 \name{performance-class}
 \docType{class}
 \alias{performance-class}
+\alias{plot,performance,missing-method}
 \alias{show,performance-method}
 \alias{summary,performance-method}
 
@@ -22,6 +23,8 @@ Objects can be created by calls of the form \code{new("performance", ...)}.
 }
 \section{Methods}{
   \describe{
+    \item{plot}{\code{signature(x = "performance", y = "missing")}: Plot
+      this object. }
     \item{show}{\code{signature(object = "performance")}: show this
       object, briefly. }
     \item{summary}{\code{signature(object = "performance")}: display a

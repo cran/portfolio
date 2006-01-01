@@ -9,8 +9,6 @@
 setMethod("show",
           signature(object = "exposure"),
           function(object){
-            cat(paste("An object of class \"", class(object), "\"\n", sep = ""))
-
             for(v in names(object@data)){
               cat(v, "\n")
               show(object@data[[v]])
@@ -23,10 +21,23 @@ setMethod("show",
 setMethod("summary",
           signature(object = "exposure"),
           function(object){
-            for(v in names(object@data)){
-              cat(v, "\n")
-              show(object@data[[v]])
-              cat("\n")
-            }
+            show(object)
           }
+          )
+
+setMethod("plot",
+          signature(x = "exposure", y = "missing"),
+          function(x, ...){
+
+            tlist <- list()
+            for(var in names(x@data)){
+              title <- paste(var, "exposure")
+              data <- x@data[[var]]
+              data$variable <- factor(data$variable, levels = rev(unique(data$variable)))
+              tlist[[var]] <- barchart(variable ~ exposure, data = data, origin = 0, main = title)
+            }
+
+            portfolio:::.trellis.multiplot(tlist)
+          }
+          
           )

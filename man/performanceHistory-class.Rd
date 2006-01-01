@@ -1,6 +1,7 @@
 \name{performanceHistory-class}
 \docType{class}
 \alias{performanceHistory-class}
+\alias{plot,performanceHistory,missing-method}
 \alias{summary,performanceHistory-method}
 
 \title{Class "performanceHistory"}
@@ -22,6 +23,8 @@ Class \code{"objectHistory"}, directly.
 }
 \section{Methods}{
   \describe{
+    \item{plot}{\code{signature(x = "performanceHistory", y = "missing")}: Plot
+      this object. }
     \item{summary}{\code{signature(object = "performanceHistory")}:
       display of summary of this time series of performance objects. }
   }

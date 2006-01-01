@@ -2,7 +2,9 @@
 \docType{class}
 \alias{exposureHistory-class}
 \alias{mean,exposureHistory-method}
+\alias{plot,exposureHistory,missing-method}
 \alias{show,exposureHistory-method}
+\alias{summary,exposureHistory-method}
 
 \title{Class "exposureHistory"}
 \description{ A time series of objects of class "exposure". }
@@ -25,8 +27,12 @@ Class \code{"objectHistory"}, directly.
   \describe{
     \item{mean}{\code{signature(x = "exposureHistory")}: calculate the mean
       of the exposures in this object. }
+    \item{plot}{\code{signature(x = "exposureHistory", y = "missing")}: Plot
+      this object. }
     \item{show}{\code{signature(object = "exposureHistory")}: show the
       object, briefly. }
+    \item{show}{\code{signature(object = "exposureHistory")}: display a
+      summary of this object. }
   }
 }
 \author{ Jeff Enos \email{jeff@kanecap.com}}

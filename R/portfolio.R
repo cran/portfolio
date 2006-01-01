@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.R 1461 2005-11-16 20:02:25Z enos $
+## $Id: portfolio.R 1499 2006-01-01 22:50:17Z enos $
 ##
 ## A more complex, full-featured portfolio object that includes
 ## shares, a notion of equity, and is better suited for use in
@@ -25,7 +25,7 @@ setMethod("calcWeights",
             if(nrow(object@shares) == 0)
               return(object)
 
-            x <- merge(object@data, object@shares, by = "id")
+            x <- merge(object@shares, object@data, by = "id", all.x = TRUE)
             
             ## Can't calculate mv without price.var.
 
@@ -75,7 +75,7 @@ setMethod("calcShares",
               stop("Must have non-zero positive equity to calculate shares!")
             }
 
-            x <- merge(object@data, object@weights, by = "id")
+            x <- merge(object@weights, object@data, by = "id", all.x = TRUE)
             
             ## Can't calculate shares without price.var.
 
@@ -210,3 +210,45 @@ setMethod("securityInfo",
           }
           )
 
+
+setMethod("+",
+          signature(e1 = "portfolio", e2 = "portfolio"),
+          function(e1, e2){
+
+            r.basic <- callNextMethod()
+            r <- new("portfolio", type = "unknown", size = "unknown")
+            r@data <- r.basic@data
+            r@weights <- r.basic@weights
+
+            r@id.var <- r.basic@id.var
+            r@symbol.var <- r.basic@symbol.var
+            r@ret.var <- r.basic@ret.var
+
+            if(nrow(e1@shares) == 0 && nrow(e2@shares) == 0){
+              return(r)
+            }
+            else if(nrow(e1@shares) == 0){
+              r@shares <- e2@shares
+              return(r)
+            }
+            else if(nrow(e2@shares) == 0){
+              r@shares <- e1@shares
+              return(r)
+            }
+            else{
+              
+              w <- merge(subset(e1@shares, !is.na(shares)),
+                         subset(e2@shares, !is.na(shares)),
+                         suffixes = c(".e1", ".e2"), by = "id", all = TRUE)
+              
+
+              w$shares.e1[is.na(w$shares.e1)] <- 0
+              w$shares.e2[is.na(w$shares.e2)] <- 0
+              
+              w$shares <- w$shares.e1 + w$shares.e2
+              r@shares <- w[c("id","shares")]
+            }
+            return(r)
+          }
+          )
+         

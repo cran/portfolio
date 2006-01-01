@@ -1,6 +1,7 @@
 \name{exposure-class}
 \docType{class}
 \alias{exposure-class}
+\alias{plot,exposure,missing-method}
 \alias{show,exposure-method}
 \alias{summary,exposure-method}
 
@@ -19,6 +20,8 @@ Objects can be created by calls of the form \code{new("exposure", ...)}.
 }
 \section{Methods}{
   \describe{
+    \item{plot}{\code{signature(x = "exposure", y = "missing")}: Plot
+      this object. }
     \item{show}{\code{signature(object = "exposure")}: show the object,
     briefly. }
     \item{summary}{\code{signature(object = "exposure")}: display a

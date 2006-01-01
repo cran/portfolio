@@ -1,6 +1,7 @@
 \name{portfolio-class}
 \docType{class}
 \alias{portfolio-class}
+\alias{+,portfolio,portfolio-method}
 \alias{calcShares,portfolio-method}
 \alias{calcWeights,portfolio-method}
 \alias{create,portfolio-method}
@@ -71,6 +72,7 @@ Class \code{"portfolioBasic"}, directly.
 }
 \section{Methods}{
   \describe{
+    \item{+}{\code{signature(e1 = "portfolio", e2 = "portfolio")}}
     \item{calcShares}{\code{signature(object = "portfolio")}: calculate
       shares from price and weight information, and store the results in
     the \code{shares} slot.}

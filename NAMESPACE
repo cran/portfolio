@@ -1,7 +1,11 @@
-export(weight
+importFrom("graphics", plot)
+
+export(
+       "weight"
        )
 
-exportClasses("portfolioBasic",
+exportClasses(
+              "portfolioBasic",
               "portfolio",
               "objectHistory",
               "exposure",
@@ -14,24 +18,31 @@ exportClasses("portfolioBasic",
               )
 
 exportMethods(
-              show,
-              summary,
-              mean,
+              "show",
+              "summary",
+              "mean",
+              "plot",
 
-              initialize,
-              create,
-              calcWeights,
-              calcShares,
-              scaleWeights,
 
-              balance,
-              exposure,
-              performance,
-              contribution,
+              "initialize",
+              "create",
+              "calcWeights",
+              "calcShares",
+              "scaleWeights",
 
-              add,
+              "balance",
+              "exposure",
+              "performance",
+              "contribution",
+
+              "add",
+
+              "portfolioDiff",
+              "securityInfo",
+
+              "matching",
+
+              "+"
               
-              portfolioDiff,
-              securityInfo
               )
 

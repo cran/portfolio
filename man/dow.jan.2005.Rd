@@ -3,6 +3,8 @@
 \docType{data}
 \title{DJIA for January, 2005}
 \description{
+  Basic descriptive and market data for those securities in the DJIA as
+  of the end of January, 2005.
 }
 \usage{data(dow.jan.2005)}
 \format{

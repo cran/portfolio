@@ -8,6 +8,8 @@
 \DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
 \DefineVerbatimEnvironment{Scode}{Verbatim}{fontsize=\small,fontshape=sl}
 
+%% \SweaveOpts{prefix.string=graphics/portfolio}
+
 \bibliographystyle{abbrvnat}
 
 \begin{document}
@@ -17,7 +19,7 @@
 \author{by David Kane and Jeff Enos}
 
 %%\VignetteIndexEntry{Using the portfolio package}
-%%\VignetteDepends{portfolio}
+%%\VignetteDepends{portfolio,MatchIt}
 
 <<echo=FALSE>>=
 op <- options(width = 50, digits = 2, scipen = 5)
@@ -135,7 +137,7 @@ Now that we know the portfolio's exposures at the start of the time
 period, we can examine its performance for the month of January.
 
 <<>>=
-summary(performance(p))
+performance(p)
 @ 
 
 The portfolio lost 1.7\% of its value in January. The worst performing
@@ -248,13 +250,28 @@ measure of desirability, HPQ is the biggest short position. Since we
 have not changed the default value for \texttt{size} from
 ``quintile,'' there are still 6 positions per side.
 
+Figure \ref{figure:plot.portfolio} shows the result of calling
+\texttt{plot} on this portfolio object.  The top plot displays the
+relationship between position weights and their corresponding
+\texttt{in.var} values, while the bottom plot shows a histogram of
+position weights.
+
+\begin{figure}
+\centering
+\vspace*{.1in}
+<<fig=TRUE>>=
+plot(p)
+@ 
+\caption{\label{figure:plot.portfolio}
+Plot of a portfolioBasic object.}
+\end{figure}
+
 The display for the exposure object is now somewhat different to
 accommodate the structure of a long-short portfolio. 
 
 <<>>=
 exposure(p, exp.var = c("price", "sector"))
 @ 
-
 
 The \texttt{long} exposure to price is simply the weighted average of
 price on the long side of the portfolio, where the weighting is done
@@ -263,7 +280,6 @@ true on the short side.  Since a linear weighting used here emphasises
 the tail of the distribution, the long exposure is greater than the
 long exposure of the equal weighted portfolio considered above, \$93
 versus \$85.
-
 
 Since the weights on the short side are actually negative --- in the
 sense that we are negatively exposed to positive price changes in
@@ -289,10 +305,27 @@ therefore, 62\% long Industrials. We have 24\% of the longs holdings
 in Technology, but more 67\% of the short holdings; so we are 43\%
 short Technology.
 
+Calling \texttt{plot} on the exposure object produces a bar chart for
+each exposure category, as seen in Figure \ref{figure:plot.exposure}.  Since all
+numeric exposures are grouped together, a plot of numeric exposure may
+only make sense if all numeric variables are on the same scale.  In
+this example, the only numeric exposure we have calculated is that to
+\texttt{price}.
+
+\begin{figure}
+\centering
+\vspace*{.1in}
+<<fig=TRUE>>=
+plot(exposure(p, exp.var = c("price", "sector")))
+@ 
+\caption{\label{figure:plot.exposure} Plot of an exposure object for a
+single period.  Bar charts are sorted by exposure.}
+\end{figure}
+
 The performance object is similar for a long-short portfolio.
 
 <<>>=
-summary(performance(p))
+performance(p)
 @ 
 
 The portfolio was up 2.2\% in January. By default, the summary of the
@@ -318,6 +351,24 @@ and short sides \emph{considered together} invested in the Technology
 sector. We know from the exposure results above that most of this is
 invested on the short side, but in the context of contributions, it
 does not matter on which side the capital is deployed.
+
+Plotting objects of class \texttt{contribution} produces output
+similar to plotting exposures, as can be seen in Figure
+\ref{figure:plot.contribution}.  This time, however, we see values of
+\texttt{roic} plotted against the categories that make up each
+\texttt{contrib.var}.  For numeric variables, \texttt{roic} for each
+interval is shown; numeric intervals will always appear in order.
+
+\begin{figure}
+\centering
+\vspace*{.1in}
+<<fig=TRUE>>=
+plot(contribution(p, contrib.var = c("cap.bil", "sector")))
+@ 
+\caption{\label{figure:plot.contribution} Plot of a contribution object for a
+single period.}
+\end{figure}
+
 
 \section*{Multi-Period, Long-Short}
 
@@ -373,9 +424,21 @@ simple averages of the of the 12 monthly exposures. Even though the
 portfolio is constructed without reference to \texttt{currency} or
 \texttt{sector}, it still ends up with non-trivial exposures to these
 variables. In a typical month, the portfolio is 13\% long
-Communications and 10\% short Japan. In future versions of the
-package, we plan on adding other analytics as well as plotting
-methods.
+Communications and 10\% short Japan.
+
+Plotting the \texttt{exposureHistory} object yields box and whisker
+plots of net exposure for each exposure variable, as in Figure
+\ref{figure:plot.exposureHistory}.
+
+\begin{figure}
+\centering
+\vspace*{.1in}
+<<fig=TRUE>>=
+plot(exposure(global.2004.history))
+@ 
+\caption{\label{figure:plot.exposureHistory} Plot of an exposureHistory object.}
+\end{figure}
+
 
 The \texttt{performance} method aggregates performance for each
 individual time period into an overall figure and provides a listing
@@ -384,6 +447,18 @@ of the largest contributions.
 <<>>=
 performance(global.2004.history)
 @ 
+
+Plotting the resulting object will display a line chart of cumulative
+total return, as in Figure \ref{figure:plot.performanceHistory}.
+
+\begin{figure}
+\centering
+\vspace*{.1in}
+<<fig=TRUE>>=
+plot(performance(global.2004.history))
+@
+\caption{\label{figure:plot.performanceHistory} Plot of a performanceHistory object.}
+\end{figure}
 
 The best month for the portfolio was April 2004 when it earned 1.5\%.
 The worst month was a loss of almost 3\% in November. The biggest
@@ -413,8 +488,23 @@ contribution(global.2004.history)
 @ 
 
 Again, the basic approach consists of calculating the contributions
-for each time period separately, saving those results, and the
+for each time period separately, saving those results, and then
 presenting an average for the entire period. 
+
+Figure \ref{figure:plot.contributionHistory} shows the plot of the
+resulting \texttt{contributionHistory} object.  As with exposure
+history, the box and whisker plot shows the mean and quantile range of
+variable values over the given time period.
+
+\begin{figure}
+\centering
+\vspace*{.1in}
+<<fig=TRUE>>=
+plot(contribution(global.2004.history))
+@
+\caption{\label{figure:plot.contributionHistory} Plot of a contributionHistory object.}
+\end{figure}
+
 
 \section*{Conclusion}
 

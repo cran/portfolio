@@ -18,15 +18,14 @@ setMethod("show",
                                                  }))), collapse = " "),
                       "\n"))
             
-            ## Don't show data for now.
-            
-            ## cat("Data:\n\n")
+          }
+          )
 
-            ## for(v in names(object@data)){
-            ##  cat(v, "\n")
-            ##  show(object@data[[v]])
-            ##  cat("\n")
-            ## }
+setMethod("summary",
+          signature(object = "exposureHistory"),
+          function(object){
+            cat("Mean exposure:\n")
+            show(mean(object))
           }
           )
 
@@ -56,5 +55,24 @@ setMethod("mean",
             }
             invisible(exp.obj)
 
+          }
+          )
+
+setMethod("plot",
+          signature(x = "exposureHistory", y = "missing"),
+          function(x){
+
+            tlist <- list()
+            for(var in unique(unlist(lapply(x@data, function(x){ names(x@data) })))){
+              title <- paste(var, "exposure")
+              data <- do.call(rbind, lapply(x@data, function(x){ x@data[[var]] }))
+
+              ## Display by variable value alphabetically.
+              
+              data$variable <- factor(data$variable, levels = rev(sort(unique(as.character(data$variable)))))
+              tlist[[var]] <- bwplot(variable ~ exposure, data = data, main = title)
+            }
+
+            portfolio:::.trellis.multiplot(tlist)
           }
           )

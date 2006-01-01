@@ -1,6 +1,7 @@
 \name{contribution-class}
 \docType{class}
 \alias{contribution-class}
+\alias{plot,contribution,missing-method}
 \alias{show,contribution-method}
 \alias{summary,contribution-method}
 
@@ -18,6 +19,8 @@ Objects can be created by calls of the form \code{new("contribution", ...)}.
 }
 \section{Methods}{
   \describe{
+    \item{plot}{\code{signature(x = "contribution", y = "missing")}: Plot
+      this object. }
     \item{show}{\code{signature(object = "contribution")}: show this
       object, briefly. }
     \item{summary}{\code{signature(object = "contribution")}: display a

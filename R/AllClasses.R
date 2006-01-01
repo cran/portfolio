@@ -41,6 +41,7 @@ setClass("portfolioBasic",
 
                         type          = "character",
                         size          = "characterOrNumeric",
+                        weight.range  = "numeric",
                         sides         = "character",
                         
                         ## Weights storage.  Contains data frame with
@@ -67,6 +68,7 @@ setClass("portfolioBasic",
            
            type          = "equal",
            size          = "quintile",
+           weight.range  = c(0, Inf),
            sides         = c("long","short"),
            
            weights       = data.frame()
