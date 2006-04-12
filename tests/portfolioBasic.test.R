@@ -10,7 +10,7 @@ library(portfolio)
 
 load("portfolioBasic.test.RData")
 
-## save(data, exp.1, file = "portfolioBasic.test.RData")
+## save(data, exp.1, file = "portfolioBasic.test.RData", compress = TRUE)
 
 data <- data.frame(id = 1:20, in.var = 1:20)
 data$in.var <- as.numeric(data$in.var)

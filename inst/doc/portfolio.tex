@@ -21,9 +21,6 @@
 %%\VignetteIndexEntry{Using the portfolio package}
 %%\VignetteDepends{portfolio}
 
-<<echo=FALSE>>=
-op <- options(width = 50, digits = 4, scipen = 5)
-@
 
 \maketitle
 
@@ -48,12 +45,57 @@ Consider a simple long-only portfolio formed from the universe 30
 stocks in the Dow Jones Industrial Average (DJIA) in January, 2005. Start by
 loading and examining the input data.
 
-<<>>=
-library(portfolio)
-data(dow.jan.2005)
-summary(dow.jan.2005)
-head(dow.jan.2005)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> library(portfolio)
+> data(dow.jan.2005)
+> summary(dow.jan.2005)
+\end{Sinput}
+\begin{Soutput}
+    symbol              name          
+ Length:30          Length:30         
+ Class :character   Class :character  
+ Mode  :character   Mode  :character  
+                                      
+                                      
+                                      
+                                      
+     price                  sector 
+ Min.   : 21.0   Industrials   :6  
+ 1st Qu.: 32.1   Staples       :6  
+ Median : 42.2   Cyclicals     :4  
+ Mean   : 48.6   Financials    :4  
+ 3rd Qu.: 56.0   Technology    :4  
+ Max.   :103.3   Communications:3  
+                 (Other)       :3  
+    cap.bil        month.ret       
+ Min.   : 22.6   Min.   :-0.12726  
+ 1st Qu.: 53.9   1st Qu.:-0.05868  
+ Median : 97.3   Median :-0.02758  
+ Mean   :126.0   Mean   :-0.02914  
+ 3rd Qu.:169.3   3rd Qu.: 0.00874  
+ Max.   :385.9   Max.   : 0.04468  
+\end{Soutput}
+\begin{Sinput}
+> head(dow.jan.2005)
+\end{Sinput}
+\begin{Soutput}
+     symbol                         name price
+140      AA                    ALCOA INC 31.42
+214      MO             ALTRIA GROUP INC 61.10
+270     AXP          AMERICAN EXPRESS CO 56.37
+294     AIG AMERICAN INTERNATIONAL GROUP 65.67
+946      BA                    BOEING CO 51.77
+1119    CAT              CATERPILLAR INC 97.51
+          sector cap.bil month.ret
+140    Materials   27.35 -0.060789
+214      Staples  125.41  0.044681
+270   Financials   70.75 -0.051488
+294   Financials  171.04  0.009441
+946  Industrials   43.47 -0.022600
+1119 Industrials   33.27 -0.082199
+\end{Soutput}
+\end{Schunk}
 
 The DJIA consists of exactly 30 large US stocks. We provide a minimal
 set of information for constructing a long-only portfolio. Note that
@@ -66,20 +108,44 @@ In order to create an object of class \texttt{portfolioBasic}, we can
 use this data and form a portfolio on the basis of a ``nonsense''
 variable like \texttt{price}.
 
-<<echo=FALSE>>=
-options(digits = 3)
-@
 
-<<>>=
-p <- new("portfolioBasic", 
-         date = as.Date("2004-12-31"),
-         id.var = "symbol",
-         in.var = "price",
-         sides = "long", 
-         ret.var = "month.ret", 
-         data = dow.jan.2005)
-summary(p)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> p <- new("portfolioBasic", date = as.Date("2004-12-31"), 
++     id.var = "symbol", in.var = "price", 
++     sides = "long", ret.var = "month.ret", 
++     data = dow.jan.2005)
+\end{Sinput}
+\begin{Soutput}
+An object of class "portfolioBasic" with 6 positions
+
+Selected slots:
+name: Unnamed portfolio
+date: 2004-12-31
+in.var: price
+ret.var: month.ret
+type: equal
+size: quintile
+\end{Soutput}
+\begin{Sinput}
+> summary(p)
+\end{Sinput}
+\begin{Soutput}
+Portfolio: Unnamed portfolio
+
+        count       weight
+Long:       6            1 
+
+Top/bottom positions by weight:
+   id  pct
+1 AIG 16.7
+2 CAT 16.7
+3 IBM 16.7
+4 JNJ 16.7
+5 MMM 16.7
+6 UTX 16.7
+\end{Soutput}
+\end{Schunk}
 
 In other words, we have formed a portfolio of the highest priced 6
 stocks out of the 30 stocks in the DJIA. The \texttt{id.var} argument
@@ -106,9 +172,23 @@ These can be calculated with respect to both numeric or factor
 variables.  The method \texttt{exposure} will accept a vector of
 variable names.
 
-<<>>=
-exposure(p, exp.var = c("price", "sector"))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> exposure(p, exp.var = c("price", "sector"))
+\end{Sinput}
+\begin{Soutput}
+numeric 
+  variable exposure
+1    price     85.1
+
+sector 
+     variable exposure
+2 Industrials    0.500
+1  Financials    0.167
+3     Staples    0.167
+4  Technology    0.167
+\end{Soutput}
+\end{Schunk}
 
 The weighted average price of the portfolio is 85. In other words,
 since the portfolio is equal-weighted, the average share price of AIG,
@@ -141,9 +221,23 @@ formation. In this example, we are using one month forward returns.
 Now that we know the portfolio's exposures at the start of the time
 period, we can examine its performance for the month of January.
 
-<<>>=
-performance(p)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> performance(p)
+\end{Sinput}
+\begin{Soutput}
+Total return:  -1.71 % 
+
+Best/Worst performers:
+   id weight      ret  contrib
+2 CAT  0.167 -0.08220 -0.01370
+3 IBM  0.167 -0.05234 -0.00872
+6 UTX  0.167 -0.02583 -0.00431
+1 AIG  0.167  0.00944  0.00157
+4 JNJ  0.167  0.02018  0.00336
+5 MMM  0.167  0.02790  0.00465
+\end{Soutput}
+\end{Schunk}
 
 The portfolio lost 1.7\% of its value in January. The worst performing
 stock was CAT (Caterpillar), down more than 8\%. The best performing
@@ -160,9 +254,25 @@ of themselves. More important is to examine summary statistics of the
 contributions across different categories of stocks. Consider the use
 of the \texttt{contribution} method:
 
-<<>>=
-contribution(p, contrib.var = c("sector"))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> contribution(p, contrib.var = c("sector"))
+\end{Sinput}
+\begin{Soutput}
+sector 
+         variable weight  contrib     roic
+11 Communications  0.000  0.00000  0.00000
+21  Conglomerates  0.000  0.00000  0.00000
+31      Cyclicals  0.000  0.00000  0.00000
+41         Energy  0.000  0.00000  0.00000
+1      Financials  0.167  0.00157  0.00944
+2     Industrials  0.500 -0.01336 -0.02671
+5       Materials  0.000  0.00000  0.00000
+3         Staples  0.167  0.00336  0.02018
+4      Technology  0.167 -0.00872 -0.05234
+6       Utilities  0.000  0.00000  0.00000
+\end{Soutput}
+\end{Schunk}
 
 \texttt{contribution}, like \texttt{exposure}, accepts a vector of
 variable names.  In the case of \texttt{sector}, the contribution
@@ -204,9 +314,20 @@ and into Staples.
 
 \texttt{contribution} can also work with numeric variables.
 
-<<>>=
-contribution(p, contrib.var = c("cap.bil"))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> contribution(p, contrib.var = c("cap.bil"))
+\end{Sinput}
+\begin{Soutput}
+cap.bil 
+       rank    variable weight   contrib     roic
+1   1 - low (22.6,50.9]  0.167 -0.013700 -0.08220
+2         2 (50.9,71.1]  0.333  0.000345  0.00103
+11        3  (71.1,131]  0.000  0.000000  0.00000
+3         4   (131,191]  0.500 -0.003787 -0.00757
+21 5 - high   (191,386]  0.000  0.000000  0.00000
+\end{Soutput}
+\end{Schunk}
 
 Analysing contributions only makes sense in the context of categories
 into which each position can be placed. So, we need to break up a
@@ -233,17 +354,49 @@ the concepts behind \emph{exposures}, \emph{performance} and
 long-short portfolio which uses the same underlying data.
 
 
-<<>>=
-p <- new("portfolioBasic",
-         date = as.Date("2004-12-31"),
-         id.var = "symbol",
-         in.var = "price",
-         type = "linear",
-         sides = c("long", "short"),
-         ret.var = "month.ret",
-         data = dow.jan.2005)
-summary(p)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> p <- new("portfolioBasic", date = as.Date("2004-12-31"), 
++     id.var = "symbol", in.var = "price", 
++     type = "linear", sides = c("long", 
++         "short"), ret.var = "month.ret", 
++     data = dow.jan.2005)
+\end{Sinput}
+\begin{Soutput}
+An object of class "portfolioBasic" with 12 positions
+
+Selected slots:
+name: Unnamed portfolio
+date: 2004-12-31
+in.var: price
+ret.var: month.ret
+type: linear
+size: quintile
+\end{Soutput}
+\begin{Sinput}
+> summary(p)
+\end{Sinput}
+\begin{Soutput}
+Portfolio: Unnamed portfolio
+
+        count       weight
+Long:       6            1 
+Short:      6           -1 
+
+Top/bottom positions by weight:
+     id    pct
+12  UTX  28.57
+5   IBM  23.81
+2   CAT  19.05
+8   MMM  14.29
+1   AIG   9.52
+10  PFE  -9.52
+9  MSFT -14.29
+11  SBC -19.05
+6  INTC -23.81
+4   HPQ -28.57
+\end{Soutput}
+\end{Schunk}
 
 Besides changing to a long-short portfolio, we have also provided a
 value of ``linear'' to the \texttt{type} argument. As the summary
@@ -264,9 +417,12 @@ position weights.
 \begin{figure}
 \centering
 \vspace*{.1in}
-<<fig=TRUE>>=
-plot(p)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> plot(p)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{portfolio-010}
 \caption{\label{figure:plot.portfolio}
 Plot of a portfolioBasic object.}
 \end{figure}
@@ -274,9 +430,24 @@ Plot of a portfolioBasic object.}
 The display for the exposure object is now somewhat different to
 accommodate the structure of a long-short portfolio. 
 
-<<>>=
-exposure(p, exp.var = c("price", "sector"))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> exposure(p, exp.var = c("price", "sector"))
+\end{Sinput}
+\begin{Soutput}
+numeric 
+  variable long short exposure
+1    price 92.6 -24.2     68.4
+
+sector 
+        variable   long   short exposure
+2    Industrials 0.6190  0.0000   0.6190
+1     Financials 0.0952  0.0000   0.0952
+3        Staples 0.0476 -0.0952  -0.0476
+5 Communications 0.0000 -0.2381  -0.2381
+4     Technology 0.2381 -0.6667  -0.4286
+\end{Soutput}
+\end{Schunk}
 
 The \texttt{long} exposure to price is simply the weighted average of
 price on the long side of the portfolio, where the weighting is done
@@ -320,18 +491,40 @@ this example, the only numeric exposure we have calculated is that to
 \begin{figure}
 \centering
 \vspace*{.1in}
-<<fig=TRUE>>=
-plot(exposure(p, exp.var = c("price", "sector")))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> plot(exposure(p, exp.var = c("price", 
++     "sector")))
+\end{Sinput}
+\end{Schunk}
+\includegraphics{portfolio-012}
 \caption{\label{figure:plot.exposure} Plot of an exposure object for a
 single period.  Bar charts are sorted by exposure.}
 \end{figure}
 
 The performance object is similar for a long-short portfolio.
 
-<<>>=
-performance(p)
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> performance(p)
+\end{Sinput}
+\begin{Soutput}
+Total return:  2.19 % 
+
+Best/Worst performers:
+     id  weight      ret  contrib
+2   CAT  0.1905 -0.08220 -0.01566
+5   IBM  0.2381 -0.05234 -0.01246
+12  UTX  0.2857 -0.02583 -0.00738
+3   DIS -0.0476  0.02986 -0.00142
+1   AIG  0.0952  0.00944  0.00090
+8   MMM  0.1429  0.02790  0.00399
+6  INTC -0.2381 -0.04019  0.00957
+10  PFE -0.0952 -0.10152  0.00967
+11  SBC -0.1905 -0.06617  0.01260
+4   HPQ -0.2857 -0.06581  0.01880
+\end{Soutput}
+\end{Schunk}
 
 The portfolio was up 2.2\% in January. By default, the summary of the
 \texttt{performance} object only provides the 5 worst and best
@@ -345,9 +538,34 @@ on performance.
 The \texttt{contribution} function provides similar output for a
 long-short portfolio.
 
-<<>>=
-contribution(p, contrib.var = c("cap.bil", "sector"))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> contribution(p, contrib.var = c("cap.bil", 
++     "sector"))
+\end{Sinput}
+\begin{Soutput}
+cap.bil 
+      rank    variable weight  contrib     roic
+1  1 - low (22.6,50.9] 0.0952 -0.01566 -0.16440
+2        2 (50.9,71.1] 0.3810  0.01399  0.03671
+3        3  (71.1,131] 0.0952  0.01260  0.13235
+4        4   (131,191] 0.3095 -0.00103 -0.00334
+5 5 - high   (191,386] 0.1190  0.01202  0.10098
+
+sector 
+         variable weight contrib    roic
+1  Communications 0.1190  0.0112  0.0939
+11  Conglomerates 0.0000  0.0000  0.0000
+21      Cyclicals 0.0000  0.0000  0.0000
+31         Energy 0.0000  0.0000  0.0000
+2      Financials 0.0476  0.0009  0.0189
+3     Industrials 0.3095 -0.0191 -0.0616
+41      Materials 0.0000  0.0000  0.0000
+4         Staples 0.0714  0.0106  0.1488
+5      Technology 0.4524  0.0183  0.0404
+51      Utilities 0.0000  0.0000  0.0000
+\end{Soutput}
+\end{Schunk}
 
 As in the last example, the \texttt{weight} column reflects the
 proportion of the portfolio invested in each category.  In this case,
@@ -367,9 +585,13 @@ interval is shown; numeric intervals will always appear in order.
 \begin{figure}
 \centering
 \vspace*{.1in}
-<<fig=TRUE>>=
-plot(contribution(p, contrib.var = c("cap.bil", "sector")))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> plot(contribution(p, contrib.var = c("cap.bil", 
++     "sector")))
+\end{Sinput}
+\end{Schunk}
+\includegraphics{portfolio-015}
 \caption{\label{figure:plot.contribution} Plot of a contribution object for a
 single period.}
 \end{figure}
@@ -385,10 +607,33 @@ construct a \texttt{portfolioHistory} object. Here, we will just load
 up the example object provided with the package and consider the
 associated methods for working with it.
 
-<<>>=
-data(global.2004.history)
-global.2004.history
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> data(global.2004.history)
+> global.2004.history
+\end{Sinput}
+\begin{Soutput}
+An object of class "portfolioHistory"
+Contains:
+
+Object of class "exposureHistory"
+Number of periods: 12 
+Period range: 2003-12-31 -- 2004-11-30 
+Data class: exposure 
+Variables: numeric currency sector 
+
+Object of class "performanceHistory"
+Number of periods: 12 
+Period range: 2003-12-31 -- 2004-11-30 
+Data class: performance 
+
+Object of class "contributionHistory"
+Number of periods: 12 
+Period range: 2003-12-31 -- 2004-11-30 
+Data class: contribution 
+Variables: currency sector liq.w 
+\end{Soutput}
+\end{Schunk}
 
 Note that the portfolios analysed in this object were created on a
 monthly frequency for 2004 using a universe of the 500 largest global
@@ -405,9 +650,44 @@ just as we called them on objects of class \texttt{portfolio}.  An
 added call to \texttt{summary} prints a summary of the returned
 object.
 
-<<>>=
-summary(exposure(global.2004.history))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> summary(exposure(global.2004.history))
+\end{Sinput}
+\begin{Soutput}
+Mean exposure:
+numeric 
+   variable   long   short exposure
+11  cap.bil 109.20 -10.483    98.71
+1     liq.w   1.22   0.822     2.04
+
+currency 
+   variable     long     short  exposure
+6       JPY 0.062978 -0.158931 -0.095952
+8       SEK 0.000948 -0.040208 -0.039260
+5       HKD 0.000000 -0.017283 -0.017283
+1       AUD 0.001242 -0.005734 -0.004491
+7       NOK 0.000000 -0.003949 -0.003949
+9       SGD 0.000000 -0.000438 -0.000438
+3       EUR 0.179902 -0.176904  0.002998
+4       GBP 0.113589 -0.109119  0.004470
+2       CHF 0.042340 -0.019232  0.023108
+10      USD 0.598999 -0.468202  0.130797
+
+sector 
+         variable    long    short  exposure
+10      Utilities 0.00803 -0.08832 -0.080290
+3       Cyclicals 0.04980 -0.12475 -0.074945
+7       Materials 0.00112 -0.05876 -0.057636
+6     Industrials 0.04147 -0.09762 -0.056152
+2   Conglomerates 0.00000 -0.00356 -0.003563
+9      Technology 0.08784 -0.08730  0.000545
+8         Staples 0.24521 -0.23168  0.013532
+5      Financials 0.24544 -0.19245  0.052982
+4          Energy 0.10328 -0.03456  0.068719
+1  Communications 0.19144 -0.05385  0.137588
+\end{Soutput}
+\end{Schunk}
 
 The difficulty in considering exposures --- basically a static concept
 about how the portfolio looks at this moment --- in the context of a
@@ -440,9 +720,12 @@ plots of net exposure for each exposure variable, as in Figure
 \begin{figure}
 \centering
 \vspace*{.1in}
-<<fig=TRUE>>=
-plot(exposure(global.2004.history))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> plot(exposure(global.2004.history))
+\end{Sinput}
+\end{Schunk}
+\includegraphics{portfolio-018}
 \caption{\label{figure:plot.exposureHistory} Plot of an exposureHistory object.}
 \end{figure}
 
@@ -451,9 +734,43 @@ The \texttt{performance} method aggregates performance for each
 individual time period into an overall figure and provides a listing
 of the largest contributions.
 
-<<>>=
-summary(performance(global.2004.history))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> summary(performance(global.2004.history))
+\end{Sinput}
+\begin{Soutput}
+Performance summary (frequency = 12):
+
+               ret
+mean       -0.0081
+mean (ann) -0.0971
+sd          0.0152
+sd (ann)    0.0527
+sharpe     -1.8439
+
+Best period:
+                 date    ret
+2004-03-31 2004-03-31 0.0149
+
+
+Worst period:
+                 date     ret
+2004-10-31 2004-10-31 -0.0292
+
+Top/Bottom performers (total contribution):
+          id  contrib
+140     EBAY  0.00423
+231   MRW.LN  0.00387
+234       MU  0.00357
+338      XOM  0.00337
+196      JNJ  0.00333
+211      LTR -0.00416
+323 VOLVB.SS -0.00453
+329      WLP -0.00474
+227      MON -0.00494
+11      5201 -0.00555
+\end{Soutput}
+\end{Schunk}
 
 The best month for the portfolio was April 2004 when it earned 1.5\%.
 The worst month was a loss of almost 3\% in November. The biggest
@@ -478,9 +795,48 @@ As with the \texttt{exposure} method, the \texttt{contribution} method
 works with \texttt{portfolioHistory} objects in the same way that it
 works with \texttt{portfolio} objects.
 
-<<>>=
-summary(contribution(global.2004.history))
-@ 
+\begin{Schunk}
+\begin{Sinput}
+> summary(contribution(global.2004.history))
+\end{Sinput}
+\begin{Soutput}
+Mean contribution:
+currency 
+   variable   weight     contrib     roic
+1       AUD 0.003488 -0.00014179 -0.02622
+2       CHF 0.030786  0.00000868 -0.00291
+11      DKK 0.000000  0.00000000  0.00000
+3       EUR 0.178403 -0.00104765 -0.00620
+4       GBP 0.111354 -0.00048120 -0.00409
+5       HKD 0.008641  0.00011748 -0.00720
+6       JPY 0.110954  0.00005111 -0.00273
+21      NOK 0.001974 -0.00012765 -0.03745
+7       SEK 0.020578 -0.00111390 -0.04674
+31      SGD 0.000219 -0.00000963 -0.01264
+8       USD 0.533601 -0.00534746 -0.00996
+
+sector 
+         variable  weight    contrib     roic
+1  Communications 0.12610  0.0008478  0.00814
+11  Conglomerates 0.00179 -0.0000746 -0.01039
+2       Cyclicals 0.08961 -0.0025430 -0.02863
+3          Energy 0.07077  0.0008145  0.01384
+4      Financials 0.22484 -0.0010191 -0.00416
+5     Industrials 0.07153 -0.0014918 -0.01990
+6       Materials 0.03067 -0.0002470 -0.01246
+7         Staples 0.24511 -0.0036175 -0.01483
+8      Technology 0.09007  0.0002594  0.00231
+9       Utilities 0.04950 -0.0011930 -0.02607
+
+liq.w 
+  variable weight  contrib    roic
+1  1 - low 0.2628 -0.00390 -0.0140
+2        2 0.1607 -0.00545 -0.0349
+3        3 0.0668 -0.00136 -0.0197
+4        4 0.0952 -0.00167 -0.0156
+5 5 - high 0.4144  0.00384  0.0090
+\end{Soutput}
+\end{Schunk}
 
 Again, the basic approach consists of calculating the contributions
 for each time period separately, saving those results, and then
@@ -494,9 +850,12 @@ of variable values over the given time period.
 \begin{figure}
 \centering
 \vspace*{.1in}
-<<fig=TRUE>>=
-plot(contribution(global.2004.history))
-@
+\begin{Schunk}
+\begin{Sinput}
+> plot(contribution(global.2004.history))
+\end{Sinput}
+\end{Schunk}
+\includegraphics{portfolio-021}
 \caption{\label{figure:plot.contributionHistory} Plot of a contributionHistory object.}
 \end{figure}
 
@@ -516,6 +875,3 @@ cooperate on the tools that we all use.
 \end{article}
 \end{document}
 
-<<echo=FALSE>>=
-options(op)
-@

@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.R 1499 2006-01-01 22:50:17Z enos $
+## $Id: portfolio.R 1529 2006-04-12 13:31:20Z enos $
 ##
 ## A more complex, full-featured portfolio object that includes
 ## shares, a notion of equity, and is better suited for use in

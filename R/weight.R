@@ -8,13 +8,12 @@
 
 weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FALSE){
 
-  
-  x <- x[c(in.var, weight.var)]
-  
   ## Does x have the in.var in question?
 
   stopifnot(in.var %in% names(x))
   stopifnot(is.numeric(x[[in.var]]))
+
+  x <- x[c(in.var, weight.var)]
   
   ## Figure out what type we're working with
   

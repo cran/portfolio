@@ -107,7 +107,7 @@ setClass("portfolio",
              return(TRUE)
            
            m <- merge(object@weights, object@shares, by = "id")
-           return(nrow(object@weights) == nrow(m))
+           return(nrow(object@weights) == nrow(m) && nrow(object@shares) == nrow(m))
          }
          )
 
@@ -240,7 +240,7 @@ setClass("portfolioHistory",
 
            performance   = new("performanceHistory"),
 
-           att.var       = character(0),
+           contrib.var       = character(0),
            contribution   = new("contributionHistory")
            )
          )

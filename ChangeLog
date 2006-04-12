@@ -1,0 +1,5 @@
+2006-04-12 Jeff Enos (jeff@kanecap.com)
+	
+	* DESCRIPTION (Version): 0.2-1 released to CRAN. Multiple tests added.
+	* R/AllClasses.R: removed invalid assignment in class declaration of
+	portfolioHistory
