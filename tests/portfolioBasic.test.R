@@ -42,10 +42,23 @@ stopifnot(
           all.equal(sum(x@weights$weight[x@weights$weight > 0]), 1)
           )
 
-stopifnot(
-          all.equal(exp.1@data,
-                    exposure(x, exp.var = c("by.var.1","by.var.2","by.var.3"))@data)
-          )
+exp.1.test <- exposure(x, exp.var = c("by.var.1","by.var.2","by.var.3"))
+
+## Function to test equality of data frame components of the exposure
+## object's data slot.  Different default handling of row.names in
+## 2.4.0 makes it necessary to compare column-by-column.
+
+exp.df.equal <- function(e1, e2) {
+  return(all.equal(e1$variable, e2$variable) &&
+         all.equal(e1$long,     e2$long) &&
+         all.equal(e1$short,    e2$short) &&
+         all.equal(e1$exposure, e2$exposure))
+}
+
+stopifnot(all.equal(names(exp.1@data), names(exp.1.test@data)),
+          exp.df.equal(exp.1@data$numeric,  exp.1.test@data$numeric),
+          exp.df.equal(exp.1@data$by.var.1, exp.1.test@data$by.var.1),
+          exp.df.equal(exp.1@data$by.var.2, exp.1.test@data$by.var.2))
 
 ## I've removed tests involving calling the balance method and then
 ## checking exposures.  The Debian machine at CRAN encounters a

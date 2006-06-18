@@ -10,7 +10,8 @@ library(portfolio)
 
 load("portfolioBasic.performance.test.RData")
 
-## save(perf.1, perf.2, perf.3, file = "portfolioBasic.performance.test.RData", compress = TRUE)
+## save(perf.1, perf.2, perf.3, file = "portfolioBasic.performance.test.RData",
+##      compress = TRUE)
 
 data <- data.frame(id = 1:20, in.var = 1:20)
 data$in.var <- as.numeric(data$in.var)
@@ -31,8 +32,15 @@ perf.1.test <- performance(p)
 
 stopifnot(
           all.equal(perf.1.test@ret, perf.1@ret),
-          all.equal(perf.1.test@ret.detail, perf.1@ret.detail),
-          all.equal(perf.1.test@t.plus.one@weights, perf.1@t.plus.one@weights)
+
+          all.equal(perf.1.test@ret.detail$id, perf.1@ret.detail$id),
+          all.equal(perf.1.test@ret.detail$ret, perf.1@ret.detail$ret),
+          all.equal(perf.1.test@ret.detail$contrib, perf.1@ret.detail$contrib),
+
+          all.equal(perf.1.test@t.plus.one@weights$id,
+                    perf.1@t.plus.one@weights$id),
+          all.equal(perf.1.test@t.plus.one@weights$weight,
+                    perf.1@t.plus.one@weights$weight)
           )
 
 ## NA returns are allowed, but won't contribute to the total return.
@@ -46,8 +54,15 @@ perf.2.test <- performance(p)
        
 stopifnot(
           all.equal(perf.2.test@ret, perf.2@ret),
-          all.equal(perf.2.test@ret.detail, perf.2@ret.detail),
-          all.equal(perf.2.test@t.plus.one@weights, perf.2@t.plus.one@weights)
+
+          all.equal(perf.2.test@ret.detail$id, perf.2@ret.detail$id),
+          all.equal(perf.2.test@ret.detail$ret, perf.2@ret.detail$ret),
+          all.equal(perf.2.test@ret.detail$contrib, perf.2@ret.detail$contrib),
+
+          all.equal(perf.2.test@t.plus.one@weights$id,
+                    perf.2@t.plus.one@weights$id),
+          all.equal(perf.2.test@t.plus.one@weights$weight,
+                    perf.2@t.plus.one@weights$weight)
           )
 
 ## Now make the returns non-equal and non-symmetric.
@@ -60,6 +75,13 @@ perf.3.test <- performance(p)
 
 stopifnot(
           all.equal(perf.3.test@ret, perf.3@ret),
-          all.equal(perf.3.test@ret.detail, perf.3@ret.detail),
-          all.equal(perf.3.test@t.plus.one@weights, perf.3@t.plus.one@weights)
+
+          all.equal(perf.3.test@ret.detail$id, perf.3@ret.detail$id),
+          all.equal(perf.3.test@ret.detail$ret, perf.3@ret.detail$ret),
+          all.equal(perf.3.test@ret.detail$contrib, perf.3@ret.detail$contrib),
+
+          all.equal(perf.3.test@t.plus.one@weights$id,
+                    perf.3@t.plus.one@weights$id),
+          all.equal(perf.3.test@t.plus.one@weights$weight,
+                    perf.3@t.plus.one@weights$weight)
           )

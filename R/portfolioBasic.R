@@ -416,6 +416,11 @@ setMethod("exposure",
             ## column.
 
             if(length(unique(object@sides)) == 1){
+
+              ## Should we include row.names that are more meaningful?
+              ## We could potentially omit 'variable' and include in
+              ## row.names instead.
+
               all.exp <- lapply(all.exp, function(x) { x[c("variable", "exposure")] })
             }
 
@@ -675,6 +680,8 @@ setMethod("matching",
             x$treatment.weight <- x$weight
             x$treatment        <- !is.na(x$treatment.weight)
 
+            x <- x[c("id", "treatment", covariates)]
+            
             f <- formula(paste("treatment ~", paste(covariates, collapse = "+")))
             m <- matchit(f, data = x, method = method, discard = "both", ...)
 
