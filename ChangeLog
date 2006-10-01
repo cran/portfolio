@@ -1,10 +1,24 @@
+Version: 0.3-0 (2006-10-01)
+	* Removed classes dealing with temporal data.
+	
+	* Added tradelist class and vignette.
+
+	* Added the trades class and expose method on portfolio.
+
+	* Improved the performance method on the portfolio class to accept
+	returns, start and end prices and include a notion of profit.
+
+	* Added matching functionality from the MatchIt package.  MatchIt
+	is no longer in Suggests.
+
 Version: 0.2-2 (2006-06-18, released)
 
 	* Adjusted tests for change in class of default row.names
 	attribute in data.frame objects in R 2.4.0.
 
-2006-04-12 Jeff Enos (jeff@kanecap.com)
-	
-	* DESCRIPTION (Version): 0.2-1 released to CRAN. Multiple tests added.
-	* R/AllClasses.R: removed invalid assignment in class declaration of
-	portfolioHistory
+Version: 0.2-1 (2006-04-12, released)
+
+	* Expanded set of test cases.
+
+	* Removed invalid assignment in class declaration of
+	portfolioHistory.

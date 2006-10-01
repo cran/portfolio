@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: performance.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Class wrapping performance data.
 ##
@@ -61,7 +61,8 @@ setMethod("plot",
                            tail(y, n = 5))
               }
 
-              print(barchart(id ~ contrib, data = y, origin = 0, main = paste("Performance: ", ret, ret.tag, sep = "")))
+              print(barchart(id ~ contrib, data = y, origin = 0,
+                             main = paste("Performance: ", ret, ret.tag, sep = "")))
                              
             }
             else{
@@ -69,3 +70,4 @@ setMethod("plot",
             }
           }
           )
+

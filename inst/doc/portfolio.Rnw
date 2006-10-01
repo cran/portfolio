@@ -1,8 +1,9 @@
 \documentclass[a4paper]{report}
 \usepackage[round]{natbib}
 
-\usepackage{/usr/local/R/lib/R/share/texmf/Rnews}
-\usepackage{/usr/local/R/lib/R/share/texmf/Sweave}
+\usepackage{Rnews}
+\usepackage{fancyvrb}
+\usepackage{Sweave}  
 
 \DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,fontshape=sl}
 \DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
@@ -28,14 +29,14 @@ op <- options(width = 50, digits = 4, scipen = 5)
 \maketitle
 
 
-\section*{Introduction}
+\section*{Introduction\footnote{The original version of this article, which included historical analyses no longer included in \pkg{portfolio}, was published in volume 6/2 of R News and is available at \url{http://CRAN.R-project.org/doc/Rnews}.}}
 
 \R{} is used by major financial institutions around the world to
 manage billions of dollars in equity (stock) portfolios.
 Unfortunately, there is no open source \R{} package for facilitating
 this task. The \pkg{portfolio} package is meant to fill that gap.
 Using \pkg{portfolio}, an analyst can create an object of class
-\texttt{portfolio} (weights only) or \texttt{portfolioBasic} (weights
+\texttt{portfolioBasic} (weights only) or \texttt{portfolio} (weights
 and shares), examine its \emph{exposures} to various factors,
 calculate its \emph{performance} over time, and determine the
 \emph{contributions} to performance from various categories of stocks.
@@ -44,9 +45,9 @@ of portfolio analysis.
 
 \section*{One Period, Long-Only}
 
-Consider a simple long-only portfolio formed from the universe 30
-stocks in the Dow Jones Industrial Average (DJIA) in January, 2005. Start by
-loading and examining the input data.
+Consider a simple long-only portfolio formed from the universe of 30
+stocks in the Dow Jones Industrial Average (DJIA) in January, 2005.
+Start by loading and examining the input data.
 
 <<>>=
 library(portfolio)
@@ -72,12 +73,12 @@ options(digits = 3)
 
 <<>>=
 p <- new("portfolioBasic", 
-         date = as.Date("2004-12-31"),
-         id.var = "symbol",
-         in.var = "price",
-         sides = "long", 
+         instant = as.Date("2004-12-31"),
+         id.var  = "symbol",
+         in.var  = "price",
+         sides   = "long", 
          ret.var = "month.ret", 
-         data = dow.jan.2005)
+         data    = dow.jan.2005)
 summary(p)
 @ 
 
@@ -195,7 +196,7 @@ losses.
 
 Think about \texttt{roic} as useful in determining contributions on
 the margin. Imagine that you have the chance to move \$1 out of one
-sector and into another. Where should than initial dollar come from?
+sector and into another. Where should that initial dollar come from?
 Not from the sector with the worst total contribution. Instead, the
 marginal dollar should come from the sector with the worst
 \texttt{roic} and should be placed into the sector with the best
@@ -235,13 +236,13 @@ long-short portfolio which uses the same underlying data.
 
 <<>>=
 p <- new("portfolioBasic",
-         date = as.Date("2004-12-31"),
-         id.var = "symbol",
-         in.var = "price",
-         type = "linear",
-         sides = c("long", "short"),
+         instant = as.Date("2004-12-31"),
+         id.var  = "symbol",
+         in.var  = "price",
+         type    = "linear",
+         sides   = c("long", "short"),
          ret.var = "month.ret",
-         data = dow.jan.2005)
+         data    = dow.jan.2005)
 summary(p)
 @ 
 
@@ -307,8 +308,8 @@ factor. Colloquially, we are ``long price.''
 A similar analysis applies to sector exposures. We have 62\% of our
 long holdings in Industrials but zero of our short holdings. We are,
 therefore, 62\% long Industrials. We have 24\% of the longs holdings
-in Technology, but more than 67\% of the short holdings; so we are
-43\% short Technology.
+in Technology, but 67\% of the short holdings; so we are 43\% short
+Technology.
 
 Calling \texttt{plot} on the exposure object produces a bar chart for
 each exposure category, as seen in Figure \ref{figure:plot.exposure}.  Since all
@@ -373,133 +374,6 @@ plot(contribution(p, contrib.var = c("cap.bil", "sector")))
 \caption{\label{figure:plot.contribution} Plot of a contribution object for a
 single period.}
 \end{figure}
-
-
-\section*{Multi-Period, Long-Short}
-
-Analysing a portfolio for a single time period is a useful starting
-point, but any serious research will require considering a collection
-of portfolios over time. The \texttt{help} pages of the
-\pkg{portfolio} package provide detailed instructions on how to
-construct a \texttt{portfolioHistory} object. Here, we will just load
-up the example object provided with the package and consider the
-associated methods for working with it.
-
-<<>>=
-data(global.2004.history)
-global.2004.history
-@ 
-
-Note that the portfolios analysed in this object were created on a
-monthly frequency for 2004 using a universe of the 500 largest global
-stocks each month. Market capitalization in billions of dollars
-(\texttt{cap.bil}) was used as a measure of desirability, so the
-portfolio is long the mega-large caps and short the merely typical
-large caps.
-
-We have designed the architecture of the \pkg{portfolio} package so
-that working with multi-period portfolios is similar to working with
-single period portfolios. For starters, we can call the
-\texttt{exposure} method on objects of class \texttt{portfolioHistory}
-just as we called them on objects of class \texttt{portfolio}.  An
-added call to \texttt{summary} prints a summary of the returned
-object.
-
-<<>>=
-summary(exposure(global.2004.history))
-@ 
-
-The difficulty in considering exposures --- basically a static concept
-about how the portfolio looks at this moment --- in the context of a
-time series of \texttt{portfolio} objects is that it is not obvious
-how to summarize the exposures over time, especially in the context of
-a portfolio whose overall size is changing. In this release of the
-\pkg{portfolio} package, we will simply report the average exposure
-for all time periods. 
-
-For this example portfolio, it is easy to see that the portfolio is
-long the biggest stocks. The average market capitalization is over
-\$100 billion on the long side versus only \$10 billion on the short
-side.  This cap exposure causes the portfolio to take a similar
-``bet'' on liquidity, since larger stocks are, on average, more liquid
-than smaller stocks. The \texttt{liq.w} variable is our measure of
-liquidity --- basically how much stock is traded on a ``typical'' day
---- scaled to have mean 0 and variance 1 for this universe.
-
-The \texttt{currency} and \texttt{sector} exposures are, likewise,
-simple averages of the of the 12 monthly exposures. Even though the
-portfolio is constructed without reference to \texttt{currency} or
-\texttt{sector}, it still ends up with non-trivial exposures to these
-variables. In a typical month, the portfolio is 13\% long
-Communications and 10\% short Japan.
-
-Plotting the \texttt{exposureHistory} object yields box and whisker
-plots of net exposure for each exposure variable, as in Figure
-\ref{figure:plot.exposureHistory}.
-
-\begin{figure}
-\centering
-\vspace*{.1in}
-<<fig=TRUE>>=
-plot(exposure(global.2004.history))
-@ 
-\caption{\label{figure:plot.exposureHistory} Plot of an exposureHistory object.}
-\end{figure}
-
-
-The \texttt{performance} method aggregates performance for each
-individual time period into an overall figure and provides a listing
-of the largest contributions.
-
-<<>>=
-summary(performance(global.2004.history))
-@ 
-
-The best month for the portfolio was April 2004 when it earned 1.5\%.
-The worst month was a loss of almost 3\% in November. The biggest
-contributor on the positive side was EBAY. The mean annualized return
-of the portfolio is almost -10\%; the annualized volatility is
-5.3\%. Sharpe ratios --- defined\footnote{The definition of the Sharpe
-  ratio subtracts the risk free rate from the mean return in the
-  numerator. But, in the context of a long-short portfolio, this is
-  typically ignored.} as the mean return divided by the standard
-deviation of return --- are generally not provided for unprofitable
-portfolios, but the ratio here is -1.8.
-
-Note that the \texttt{portfolioHistory} object does not keep a record
-of every position for each time period. By design, it only retains
-summary information, albeit on a stock-by-stock basis. We want to be
-able to use this package for high frequency data --- say, a decade
-worth of daily portfolios --- so it is not easy (or even possible) to
-manipulate an object which maintains information for every stock for
-each time period.
-
-As with the \texttt{exposure} method, the \texttt{contribution} method
-works with \texttt{portfolioHistory} objects in the same way that it
-works with \texttt{portfolio} objects.
-
-<<>>=
-summary(contribution(global.2004.history))
-@ 
-
-Again, the basic approach consists of calculating the contributions
-for each time period separately, saving those results, and then
-presenting an average for the entire period. 
-
-Figure \ref{figure:plot.contributionHistory} shows the plot of the
-resulting \texttt{contributionHistory} object.  As with exposure
-history, the box and whisker plot shows the median and quartile range
-of variable values over the given time period.
-
-\begin{figure}
-\centering
-\vspace*{.1in}
-<<fig=TRUE>>=
-plot(contribution(global.2004.history))
-@
-\caption{\label{figure:plot.contributionHistory} Plot of a contributionHistory object.}
-\end{figure}
-
 
 \section*{Conclusion}
 

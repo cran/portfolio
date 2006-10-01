@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: portfolioBasic.performance.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests for performance calculation on the portfolioBasic class.
 ##

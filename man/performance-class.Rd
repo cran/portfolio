@@ -15,6 +15,14 @@ Objects can be created by calls of the form \code{new("performance", ...)}.
   \describe{
     \item{\code{ret}:}{Object of class \code{"numeric"} containing the
       total return for the period. }
+    \item{\code{profit}:}{Object of class \code{"numeric"} containing
+      the profit for the period, as a monetary amount.}
+    \item{\code{missing.price}:}{Object of class \code{"numeric"}
+      containing the number of missing prices encountered during
+      performance calculation.}
+    \item{\code{missing.return}:}{Object of class \code{"numeric"}
+      containing the number of missing returns encountered during
+      performance calculation.}
     \item{\code{ret.detail}:}{Object of class \code{"data.frame"}
       containing the per-security return detail for the period. }
     \item{\code{t.plus.one}:}{Object of class \code{"portfolioBasic"}

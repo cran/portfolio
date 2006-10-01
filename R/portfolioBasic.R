@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: portfolioBasic.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Basic portfolio class.
 ##
@@ -40,7 +40,7 @@ setMethod("create",
               if("id" %in% names(object@data)){
                 object@data$id.bak <- object@data$id
               }
-              object@data$id <- object@data[[object@id.var]]
+              object@data$id <- as.character(object@data[[object@id.var]])
             }
             
             input <- object@data
@@ -54,7 +54,7 @@ setMethod("create",
                                      object@size, object@sides,
                                      object@weight.var)
 
-            input <- input[!is.na(input$weight),][c("id", "weight")]
+            input <- input[!is.na(input$weight), c("id", "weight")]
             
             ## Apply min/max weights from the weight.range slot.
 
@@ -70,8 +70,11 @@ setMethod("create",
             }
 
             object@weights <- input
-                                  
-            show(object)
+
+            
+            ## I don't know why we were always calling show here.
+            ## show(object)
+            
             invisible(object)
           }
           )
@@ -195,7 +198,7 @@ setMethod("show",
                       nrow(object@weights)," positions\n\n", sep = ""))
             
             cat("Selected slots:\n")
-            for(v in c("name","date","symbol.var","in.var","weight.var","ret.var","type","size")){
+            for(v in c("name","instant","symbol.var","in.var","weight.var","ret.var","type","size")){
               if(length(slot(object, v)) > 0){
                 cat(paste(v, ": ", slot(object, v), "\n",sep = ""))
               }
@@ -359,8 +362,9 @@ setMethod("exposure",
               ## We might not have any rows in long or short,
               ## so don't use merge here.
               
-              exp <- data.frame(variable = union(as.character(long$variable), as.character(short$variable)))
-              exp$long <- long$long[match(exp$variable, long$variable)]
+              exp       <- data.frame(variable = union(as.character(long$variable),
+                                                       as.character(short$variable)))
+              exp$long  <- long$long[match(exp$variable, long$variable)]
               exp$short <- short$short[match(exp$variable, short$variable)]
               
               ## We will need to include a way to supply counts.
@@ -372,10 +376,6 @@ setMethod("exposure",
               exp$short[is.na(exp$short)] <- 0
 
               exp$exposure <- exp$long + exp$short
-              
-              exp$exposure <- mapply(sum, na.rm = TRUE,
-                                     exp$long,
-                                     exp$short)
 
               ## Extract desired columns from the result and sort by
               ## exposure.
@@ -434,7 +434,6 @@ setMethod("performance",
           function(object){
 
             perf <- new("performance")
-            d    <- as.character(object@date)
             
             x <- merge(object@weights, object@data, by = "id", all.x = TRUE)
             
@@ -447,14 +446,14 @@ setMethod("performance",
             
             x$contrib     <- x$weight * x[[ret.var]]
 
-            ## Collect results in an object of class
-            ## portfolioPerformance.
+            perf@ret        <- sum(x$contrib,     na.rm = TRUE)
+            perf@ret.detail <- x[c("id", "weight", "ret", "contrib")]
 
-            perf@ret             <- sum(x$contrib,     na.rm = TRUE)
-            perf@ret.detail      <- x[c("id", "weight", "ret", "contrib")]
             if(length(object@symbol.var) > 0 &&
                object@symbol.var %in% names(object@data)){
-              row.names(perf@ret.detail) <- object@data[[object@symbol.var]][match(perf@ret.detail$id, object@data$id)]
+              row.names(perf@ret.detail) <-
+                object@data[[object@symbol.var]][match(perf@ret.detail$id,
+                                                       object@data$id)]
             }
             
             ## Now expose the portfolio wrt the returns in the column
@@ -665,38 +664,194 @@ setMethod("plot",
           )
 
 setMethod("matching",
-          signature(object = "portfolioBasic", covariates = "character"),
-          function(object, covariates, method = "nearest", ...){
 
-            if (!("MatchIt" %in% .packages(all = TRUE)))
-              install.packages("MatchIt")
-            require(MatchIt)
+          signature(object     = "portfolioBasic",
+                    covariates = "character"
+                    ),
+
+          function(object, covariates, method = "greedy", n.matches = 1){
 
             if(nrow(object@weights) == 0){
               stop("Cannot calling matching on a portfolio with no positions")
             }
-            
-            x <- merge(object@data, object@weights, by = "id", all = TRUE)
-            x$treatment.weight <- x$weight
-            x$treatment        <- !is.na(x$treatment.weight)
 
-            x <- x[c("id", "treatment", covariates)]
+            ## determines which stocks are in the original portfolio
+            ## and buidl the formula from this information
             
+            x <- .matching.prep(object@data, object@weights, covariates)
             f <- formula(paste("treatment ~", paste(covariates, collapse = "+")))
-            m <- matchit(f, data = x, method = method, discard = "both", ...)
 
-            ## The match.matrix result provides a mapping from
-            ## treatment to control securities, by means of a
-            ## row.names mapping using row.names(x).
+            ## ".matchit" returns a matrix, "m".  The row names of "m"
+            ## are the "id" values for "object".  The cell values are
+            ## the "id" values for the matched portfolios.  Moving
+            ## across rows, this is a mapping of original ids to
+            ## matched ids
 
-            id.map <- data.frame(old = x[row.names(m$match.matrix),]$id,
-                                 new = x[m$match.matrix,]$id)
+            row.names(x) <- x$id
+            id.map <- portfolio:::.matchit(f, data = x, method = method,
+                                           n.matches = n.matches)
 
-            new.weights <- object@weights
-            new.weights$id <- id.map$new[match(new.weights$id, id.map$old)]
+            new.weights <- .matching.scale.weights(object@weights, id.map)
 
-            object@weights <- new.weights
-            invisible(object)
+            matches <- .build.matches(object@data$id,
+                                      id.map,
+                                      new.weights$weight)
+
+            invisible(new("matchedPortfolio", formula = f, original = object,
+                          matches = matches))
+
+
+          }
+          )
+
+.matching.prep <- function(data, weights, covariates){
+
+  ## Subroutine of "matching" method.  "data" is a data frame
+  ## containing at a minimum, an "id" column and a column for every
+  ## element in "covariates".  "weights" is a data frame containing
+  ## two columns, "id" and "weight".  Returns a data frame with at
+  ## least 3 columns, "id", "treatment", and a column for every
+  ## element in "covariates".
+  
+  res           <- merge(data, weights, by = "id", all = TRUE)
+  res$treatment        <- !is.na(res$weight)
+
+  res[c("id", "treatment", covariates)]
+}
+
+.matching.scale.weights <- function(weights, id.map){
+
+  ## Subroutine of "matching" method.  "weights" is a data frame with
+  ## columns "id" and "weight".  "id.map" is a matrix where the row
+  ## labels are the identifiers for the "original portfolio"
+  
+  res <- weights[match(dimnames(id.map)[[1]], weights$id),]
+
+  ## Determines by how much we should scale the weights on
+  ## each side, then scales them
+
+  scaling.factor <- .calc.scaling.factor(weights$weight,
+                                         res$weight)
+
+  res$weight <- .scale.weights(res$weight, scaling.factor)
+
+  res
+
+}
+
+.calc.scaling.factor <- function(orig.weights, matched.weights){
+
+  ## "orig.weights" and "matched.weights" are vectors of weights for
+  ## the original and matched portfolio.  Calculates the sums of the
+  ## weights for each side of the original portfolio and the matched
+  ## portfolio.  Returns the scaling factor for each side for the
+  ## matched portfolio
+
+  ## calculates the sum within each side for both sets of weights
+
+  side.sums.orig <- tapply(orig.weights, sign(orig.weights), sum)
+  side.sums.matched <- tapply(matched.weights, sign(matched.weights), sum)
+
+  ## calculates and returns the scaling factor
+
+  res <- as.vector(side.sums.orig/side.sums.matched)
+  names(res) <- names(side.sums.orig)
+
+  res
+}
+
+.scale.weights <- function(x, scaling.factors){
+  
+  ## "x" is a vector of weights for a single side of a portfolio.  All
+  ## the values must have the same sign.  "scaling.factors" is a named
+  ## vector of length 1 or 2.  The names are "-1", or "1" or both, and
+  ## the values are the scaling factors for the short and long sides
+  ## respectively. Returns a vector of length(x) with the values
+  ## scaled by the scaling factor that corresponds to their side
+
+  ## chooses the correct scaling factor for the side
+
+  if(sum(x) > 0){
+    index = "1"
+  }
+  else{
+    index = "-1"
+  }
+
+  x * scaling.factors[index]
+}
+
+
+
+.build.matches <- function(universe, id.map, weights){
+
+  ## "universe" is a vector of the unique identifiers for each stock
+  ## in the universe, the union of the treated and control groups.
+  ## "id.map" is a matrix of the ids of the stocks used in the
+  ## matched portfolios.  Each row is a stock and each column is a
+  ## matched portfolio.  "weights" is a vector of the weights for the
+  ## stocks in "id.map".  Its length is equal to the number of rows
+  ## in "id.map".  Returns a matrix of length equal to "universe".
+  ## The row names are specified by universe.  Each column is a
+  ## matched portfolio, and the value of a cell is the weight of that
+  ## stock in the matched portfolio.
+
+  res <- matrix(0,
+                nrow = length(universe),
+                ncol = dim(id.map)[2],
+                dimnames = list(universe, 1:dim(id.map)[2])
+                )
+  
+  ## Iterates through each column of the id.map
+
+  for(i in 1:dim(res)[2]){
+
+    ## If there is more than one entry for the same stock in a
+    ## single portfolio combine the weights for multiple entries
+    ## into a single weight
+
+    x <- tapply(weights, id.map[,i], sum)
+
+    res[match(dimnames(x)[[1]], dimnames(res)[[1]]), i] <- x
+
+  }
+
+  res
+
+}
+
+setMethod("all.equal",
+          signature(target = "portfolioBasic", current = "portfolioBasic"),
+          function(target, current){
+
+            validObject(target)
+            validObject(current)
+
+            ## Again, we need to be careful and very clear about what
+            ## we mean by portfolio equality, particularly since we
+            ## allow NA weights in the weights slot.
+
+            ## For now, two portfolioBasic objects are all.equal iff
+            ## their 'weights' data frames contain the same set of
+            ## stocks and their weights are all.equal.  That means
+            ## they have to have the same NA weights, too.
+
+            ## Should we keep the weights slot sorted by id?  That
+            ## would make things like this easier.
+            
+            w1 <- target@weights
+            w2 <- current@weights
+
+            w1 <- w1[order(w1$id),]
+            w2 <- w2[order(w2$id),]
+
+            if(!isTRUE(all.equal(w1$id, w2$id))){
+              return(paste("Identifiers:", all.equal(w1$id, w2$id)))
+            }
+            else if(!isTRUE(all.equal(w1$weight, w2$weight))){
+              return(paste("Weights:", all.equal(w1$weight, w2$weight)))
+            }
+            else TRUE
           }
           )
 
@@ -772,4 +927,43 @@ setMethod("+",
             }
           }
           )
-          
+
+setMethod("mapMarket",
+          signature(object = "portfolioBasic"),
+          function(object,
+                   area.var  = "weight",
+                   group.var = "sector",
+                   color.var = object@ret.var,
+                   label     = c(TRUE, FALSE),
+                   scale     = NULL){
+
+            stopifnot(nrow(object@weights) > 0)
+            stopifnot(all(object@weights$weight > 0))
+            
+            data <- merge(object@weights, object@data, by = "id", all.x = TRUE)
+
+            if(!all(sapply(list(area.var, group.var, color.var),
+                           function(x){ is.character(x) &&
+                                        isTRUE(length(x) == 1) } ))){
+              stop(paste("area.var, group.var, and color.var must be character",
+                         "vectors of length 1"))
+            }
+            
+            if(!all(c(area.var, group.var, color.var) %in% names(data))){
+              stop(paste("area.var, group.var, and color.var must be set to",
+                         "\"weight\" or a column in object's data slot"))
+            }
+            
+            id    <- data$id
+            area  <- data[[area.var]]
+            group <- data[[group.var]]
+            color <- data[[color.var]]
+
+            map.market(id    = id,
+                       area  = area,
+                       group = group,
+                       color = color,
+                       lab   = label,
+                       scale = scale)
+          }
+          )

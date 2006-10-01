@@ -1,26 +1,31 @@
 importFrom("graphics", plot)
 
 export(
-       "weight"
+       "weight",
+       "map.market"
+       
        )
 
 exportClasses(
               "portfolioBasic",
               "portfolio",
-              "objectHistory",
+
               "exposure",
-              "exposureHistory",
               "performance",
-              "performanceHistory",
               "contribution",
-              "contributionHistory",
-              "portfolioHistory"
+
+              "tradelist",
+              "trades",
+              "matchedPortfolio",
+              
+              "portfolioBasicOrNull",
+              "portfolioOrNull"
               )
 
 exportMethods(
               "show",
               "summary",
-              "mean",
+
               "plot",
 
 
@@ -29,20 +34,24 @@ exportMethods(
               "calcWeights",
               "calcShares",
               "scaleWeights",
-
+              "updatePrices",
+              
               "balance",
               "exposure",
               "performance",
               "contribution",
-
-              "add",
 
               "portfolioDiff",
               "securityInfo",
 
               "matching",
 
-              "+"
+              "all.equal",
+              "+",
+              "getYahooData",
+              "mapMarket",
               
-              )
+              "expose",
 
+              "expandData"
+              )

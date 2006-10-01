@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage[round]{natbib}
 
-\usepackage{/usr/local/R/lib/R/share/texmf/Sweave}
+\usepackage{Sweave}
 
 \DefineVerbatimEnvironment{Sinput}{Verbatim}{fontsize=\small,fontshape=sl}
 \DefineVerbatimEnvironment{Soutput}{Verbatim}{fontsize=\small}
@@ -15,7 +15,7 @@
 \author{by David Kane and Jeff Enos}
 
 %%\VignetteIndexEntry{Matching Portfolios}
-%%\VignetteDepends{portfolio,MatchIt}
+%%\VignetteDepends{portfolio}
 
 \maketitle
 
@@ -35,8 +35,8 @@ possible portfolios. In this case, we are comparing the performance of
 our portfolio to that of a hypothetical portfolio that is
 equal-weighted all the stocks in the universe. But, depending on the
 characteristics of our mutual fund, this may not be a reasonable
-benchmark.  More information on the performance measurement problem
-and possible solutions can be found in \citet{burns2004}.
+benchmark.\footnote{More information on the performance measurement problem
+and possible solutions can be found in \citet{burns2004}.}
 
 Matching portfolios provide a benchmark which matches the
 characteristics --- sector exposures, capitalization biases, position
@@ -66,15 +66,19 @@ expect the stocks on its Focus List to perform poorly going forward.
 On December 31, 2004, there were 33 companies on Assay's Focus List.
 The list of companies, along with data on a total of 4,000 stocks that
 were trading at that time, are available as part of the \texttt{R}
-``portfolio'' package.
+\texttt{portfolio} package.
+
+
+<<echo=FALSE,results=hide>>=
+library(portfolio)
+@ 
 
 <<>>=
-library(portfolio)
 data(assay)
 assay[c(1, 10, 100, 1000, 3000, 767),]
 @ 
 
-The variables in the data frame are as follows.
+The variables in the data frame follow:
 
 \begin{itemize}
   
@@ -98,7 +102,7 @@ The variables in the data frame are as follows.
 \item \texttt{country} is the ISO code for the country in which the
   security is traded. Note that this is not necessarily the same as
   the country in which the company is headquartered or incorporated.
-  For example, Garmin (GRMN) is trades in the US but is incorporated
+  For example, Garmin (GRMN) trades in the US but is incorporated
   in the Cayman Islands.\footnote{http://www.garmin.com}
   
 \item \texttt{currency} is the ISO code for the currency in which the
@@ -109,11 +113,11 @@ The variables in the data frame are as follows.
   
 \item \texttt{sector} is the economic sector in which a majority of
   the company's business takes place. There are
-  \Sexpr{length(table(assay$sector))} sectors in this data including
+  \Sexpr{length(table(assay[["sector"]]))} sectors in this data including
   Communications, Cyclicals, Energy, Financials and Technology.
   
 \item \texttt{liquidity} is a measure of the typical daily dollar
-  volume of trading in the security. We normalized it to be $N(0,1)$..
+  volume of trading in the security. We normalized it to be $N(0,1)$.
   
 \item \texttt{assay} is a TRUE/FALSE indicator of whether or not the
   security was on the Assay Focus List on December 31, 2004. Thirty
@@ -124,43 +128,53 @@ The variables in the data frame are as follows.
 
 \end{itemize}
 
-There are no missing observations. The universe of 4,000 companies was
-constructed by including the all the stocks on the Assay Focus list
-along with other large companies. The universe is restricted to
-companies that trade on exchanges in developed markets. For example,
-we include Japan but not South Korea, Austria but not Croatia.
+There are no missing observations. The universe of 4,000 companies
+consists of large companies and all the AFL stocks, and is restricted
+to companies that trade on exchanges in developed markets. For
+example, we include Japan but not South Korea, Austria but not
+Croatia.
 
-\section{An Assay Focus List (AFL) Portfolio}
+\section{An Assay Focus List (AFL) portfolio}
 
 Consider a portfolio formed by taking equal-weighted short positions
 in each of the Assay Focus List stocks and focusing in the returns for the
 first three months, through March 31, 2005.
 
-<<>>=
-assay$assay.wt <- ifelse(assay$assay, -1, NA)
+<<flagging focus list stocks, echo=false>>=
+assay$assay.wt <- ifelse(assay$on.fl, -1, NA)
+@ 
+
+<<creating assay portfolio>>=
+
 p <- new("portfolioBasic",
-         data = assay,
-         id.var = "symbol",
-         in.var = "assay.wt",
-         type = "relative",
-         size = "all",
+         name    = "AFL Portfolio",
+         instant = as.Date("2004-12-31"),
+         data    = assay,
+         id.var  = "symbol",
+         in.var  = "assay.wt",
+         type    = "relative",
+         size    = "all",
          ret.var = "ret.0.3.m")
 summary(p)
 summary(performance(p))
 @ 
 
-This portfolio returns 7.64\% because the average Assay stock fell in
-price by this amount during the first quarter of 2005. Now, making 7\%
-in three months is rarely a bad thing, but whether or not this counts
-as good performance depends on what the other stocks in the universe
-did during this time period. After all, instead of paying for access
-to Assay's Focus List (AFL), we could have just selected 33 stocks
-randomly and shorted them.
+This short-only portfolio returns 7.64\% because the average Assay
+stock fell in price by this amount during the first quarter of 2005.
+Making 7\% in three months is rarely a bad thing, but whether or not
+this counts as good performance depends on how other stocks in the
+universe performed during this time period.  If the universe
+consistently outperforms the AFL portfolio, then we could achieve
+better returns by shorting stocks randomly selected from the universe.
+We might question the utility of subscribing to Assay's focus list
+examine the opportunity cost of such a subscription.
 
-Since the average stock in our universe of 4,000 was up 1.4\%, the
-performance of the AFL portfolio appears quite good. If we consider a
-reasonable benchmark to be shorting 33 randomly selected stocks from
-the universe, then the AFL portfolio would have outperformed by 9\%.
+A simple analysis suggests that the AFL portfolio significantly
+outperforms the universe.  The average stock in the universe of 4,000
+was up 1.4\%, and the AFL portfolio returned 7.64\%.  If we shorted 33
+randomly selected stocks from the universe, we would expect the return
+to be $-1.4\%$.  If we consider this to be a reasonable benchmark,
+then the AFL portfolio outperformed the universe by 9\%.
 
 But is the Assay portfolio similar to the rest of the universe? To
 some extent, it is. All the securities in the universe are relatively
@@ -173,7 +187,7 @@ APL? Probably not.
 Another major difference between the AFL portfolio and the universe is
 that the AFL is concentrated in a limited number of sectors.
 
-<<>>=
+<<measuring sector exposure>>=
 exposure(p, exp.var = 'sector')
 @ 
 
@@ -187,38 +201,38 @@ short portfolio which included them would do very poorly. Assay would
 hardly deserve ``credit'' for this since it is not claiming that
 stocks in sectors which it does not cover will do well. It makes no
 predictions about how energy stocks, on average, will
-do.\footnote{Energy was, in fact, the best performing sector in Q1
-  2005, with the average stock up over 15\%.}
+do.\footnote{Energy was the best performing sector in Q1 2005, with
+the average stock up over 15\%.}
 
-Even if we were to eliminate non-US stocks from the universe
-\emph{and} stocks in sectors that Assay does not cover, we would still
-be left with a variety of incompatibilities between the AFL portfolio
-and possible benchmarks. For example, the average Assay stock has a
-liquidity of over 0.5, more than 1/2 a standard deviation greater than
-the universe as a whole. The Assay portfolio has almost 40\% of its
-holdings in Technology stocks. The universe as a whole is only 7\%
-Technology. What we need is a benchmark portfolio that looks like,
-that ``matches,'' the Assay portfolio in terms of variables like
-country, sector, liquidity and so on but which is otherwise randomly
-selected from non-Assay stocks in the universe.
+Even if we were to eliminate from the universe both non-US stocks
+\emph{and} stocks in sectors that Assay does not cover, a variety of
+incompatibilities between the AFL portfolio and possible benchmarks
+would remain.  For example, the average Assay stock has a liquidity of
+over 0.5, more than 1/2 a standard deviation greater than the universe
+as a whole. The Assay portfolio has almost 40\% of its holdings in
+Technology stocks, but the universe is only 7\% Technology. What we
+need is a benchmark portfolio that looks like, that ``matches,'' the
+Assay portfolio in terms of variables like country, sector, liquidity
+and so on but which is otherwise randomly selected from non-Assay
+stocks in the universe.
 
 \section{A Matching Portfolio}
 
-The solution to the problem of constructing a benchmark for a portfolio
-like that derived from the Assay Focus List is to create a
-``matching'' portfolio, a portfolio that is as similar in its
-characteristics as the target portfolio as possible without being
-identical to it. For the AFL benchmark, we would like a portfolio with
-similar country and sector breakdown as well as a similar distribution
-of liquidity. If the AFL portfolio does much better (because the Assay
-stocks do very poorly) than this benchmark, we have evidence that
-Assay has in fact identified companies with significant problems. It
-isn't just a matter of the AFL doing well relative to the overall
-universe because, for example, Energy stocks have risen so much and
-the AFL isn't short any energy stocks.
+The solution to the problem of constructing a benchmark for a
+portfolio like that derived from the Assay Focus List is to create a
+``matching'' portfolio, a portfolio with characteristics as similar as
+possible to the AFL portfolio without being identical to it.  For the
+AFL benchmark, we would like a portfolio with similar country and
+sector breakdown as well as a similar distribution of liquidity. If
+the AFL portfolio does much better (because the Assay stocks do very
+poorly) than this benchmark, we have evidence that Assay has in fact
+identified companies with significant problems. It isn't just a matter
+of the AFL doing well relative to the overall universe because, for
+example, Energy stocks have risen so much and the AFL isn't short any
+energy stocks.
 
 
-\subsection{Statistical Intuition}
+\subsection{Statistical intuition}
 
 One way to think about the assessment of the AFL is to consider an
 analogy to a randomized scientific experiment. Recall that a
@@ -273,23 +287,33 @@ the AFL and matching portfolio is that the former consists of stocks
 that Assay has ``heightened'' concerns about while the latter consists
 of similar stocks without such concerns, we may conclude that any
 differences in their subsequent performance is due to the treatment
-received. Now, of course, placement on the Focus List does not
-\emph{cause} a stock decline in the same way that taking an aspirin
-causes, by hypothesis, headache pain to decrease. But, mathematically,
-the set up is the same.
+received. 
+
+Now, of course, placement on the Focus List does not \emph{cause} a
+stock decline in the same way that taking an aspirin causes, by
+hypothesis, headache pain to decrease.  The price of a stock does not
+decrease as an Assay employee types the focus list, but the price of
+stocks on the focus list may decrease when Assay customers receive the
+list and sell or short the stocks on the focus list.  Whether
+information from Assay or conditions internal to a Focus List company
+cause price decline is not important.  What matters is that one can
+enter a short position before the price declines.  Ultimately, the
+concerns should be first, whether or not Assay can predict negative
+future performance and second, if one can enter a position before this
+information is incorporated into the price.
 
 
-\subsection{Making a Match}
+\subsection{Making a match}
 
 We want a matching portfolio which is as similar as possible to the
-Assay Focus List portfolio but which does not include the same stocks.
-The \texttt{matching} method in the \texttt{portfolio} package
-provides this functionality, with a little help from the MatchIt
-package (\cite{matchit.pkg}).  Calling this method on a
-\texttt{portfolio} object \texttt{p} returns a portfolio with none of
-the same positions as \texttt{p} but whose positions most closely
-resemble those in \texttt{p} along the dimensions specified in the
-\texttt{covariates} argument:
+AFL portfolio but which does not include the same stocks.  The
+\texttt{matching} method in the \texttt{portfolio} package provides
+this functionality, with a little help from the MatchIt package
+(\cite{matchit.pkg}).  Calling this method on a \texttt{portfolio}
+object, \texttt{p}, returns a portfolio of different stocks that share
+attributes with the stocks in \texttt{p}.  These positions most
+closely resemble those in \texttt{p} along the dimensions specified in
+the \texttt{covariates} argument:
 
 <<results=hide>>=
 p.m <- matching(p, covariates = c("country", "sector", "liquidity"))
@@ -301,8 +325,8 @@ summary(p.m)
 A quick inspection of the new portfolio's positions confirms that none
 of the positions of \texttt{p.m} appear in \texttt{p}.
 
-<<>>=
-all(!p.m@weights$id %in% p@weights$id)
+<<test all>>=
+all(!dimnames(p.m@matches[p.m@matches[,1] != 0,])[[1]] %in% p@weights$id)
 @ 
 
 Having created a matching portfolio using country, sector, and
@@ -314,7 +338,8 @@ stocks.  More interestingly, however, the sector exposures of
 \texttt{p.m} are quite similar to the sector exposures of \texttt{p}:
 
 <<>>=
-exposure(p.m, exp.var = 'sector')
+exposure(p, exp.var = "sector")
+exposure(p.m, exp.var = "sector")
 @ 
 
 The only difference sector-wise between the two portfolios is that
@@ -323,13 +348,13 @@ Communications.  Finally, the exposure of \texttt{p} to the numeric
 variable liquidity:
 
 <<>>=
-exposure(p, exp.var = 'liquidity')
+exposure(p, exp.var = "liquidity")
 @ 
 
 is quite close to \texttt{p.m}'s exposure to liquidity:
 
 <<>>=
-exposure(p.m, exp.var = 'liquidity')
+exposure(p.m, exp.var = "liquidity")
 @
 
 Since we matched using more than one covariate, we shouldn't expect

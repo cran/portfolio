@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: portfolio.create.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests "create" method of "portfolio" class
 ##

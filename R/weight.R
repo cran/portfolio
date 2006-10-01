@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: weight.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Form weights from a data.frame and an in.var.
 ##
@@ -62,7 +62,7 @@ weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FA
     ## Is size too small?
 
     if(size < 1){
-      stop("Size is < 1 per side.  Increase size parameter.")
+      stop("Size is < 1 per side.  Increase size parameter or number non-na in.var values.")
     }
     
     ## Are there enough values in in.var to go around?

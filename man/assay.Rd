@@ -22,7 +22,7 @@
     \item{\code{price}}{a numeric vector}
     \item{\code{sector}}{a factor with levels \code{Communications} \code{Conglomerates} \code{Cyclicals} \code{Energy} \code{Financials} \code{Industrials} \code{Materials} \code{Staples} \code{Technology} \code{Utilities}}
     \item{\code{liquidity}}{a numeric vector}
-    \item{\code{assay}}{a logical vector indicating presence on the
+    \item{\code{on.fl}}{a logical vector indicating presence on the
       Assay Focus List as of 2004-12-31.}
     \item{\code{ret.0.3.m}}{a numeric vector}
     \item{\code{ret.0.6.m}}{a numeric vector}

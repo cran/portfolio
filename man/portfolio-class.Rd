@@ -1,16 +1,33 @@
 \name{portfolio-class}
 \docType{class}
 \alias{portfolio-class}
+
 \alias{+,portfolio,portfolio-method}
+\alias{all.equal,portfolio,portfolio-method}
 \alias{calcShares,portfolio-method}
 \alias{calcWeights,portfolio-method}
+\alias{contribution,portfolio,character-method}
 \alias{create,portfolio-method}
 \alias{securityInfo,portfolio,character-method}
+\alias{getYahooData,portfolio,character-method}
+
+\alias{expandData,portfolio-method}
+\alias{expose,portfolio,trades-method}
+\alias{performance,portfolio-method}
+\alias{portfolioDiff,portfolio,portfolio-method}
+\alias{updatePrices,portfolio,character,numeric-method}
 
 \alias{calcShares}
 \alias{calcWeights}
 \alias{securityInfo}
-  
+\alias{getYahooData}
+
+\alias{expandData}
+\alias{expose}
+\alias{updatePrices}
+
+\alias{portfolioOrNull-class}
+
 \title{Class "portfolio"}
 \description{ Class "portfolio" extends class "portfolioBasic" to include
 price and share information. Price information must
@@ -32,8 +49,8 @@ Objects can be created by calls of the form \code{new("portfolio", ...)}.
     called "id".}
     \item{\code{name}:}{Object of class \code{"character"} containing
       the name for this portfolio.}
-    \item{\code{date}:}{Object of class \code{"Date"} containing a date
-      for this portfolio.}
+    \item{\code{instant}:}{Object of class \code{"ANY"} containing the
+      instant to which the portfolio pertains.}
     \item{\code{data}:}{Object of class \code{"data.frame"} containing
       supplementary information about the positions in this portfolio.
       Must include a unique "id" column.  }
@@ -73,19 +90,35 @@ Class \code{"portfolioBasic"}, directly.
 \section{Methods}{
   \describe{
     \item{+}{\code{signature(e1 = "portfolio", e2 = "portfolio")}}
+    \item{all.equal}{\code{signature(target = "portfolio", current
+	= "portfolio")}: Compare two \code{portfolio} objects for
+      "near equality".  Two \code{portfolio} objects are \code{all.equal} iff
+      they are \code{all.equal} as \code{portfolioBasic} objects, their
+      \code{shares} slots contain exactly the same set of securities and
+    shares vectors that are \code{all.equal}.}
     \item{calcShares}{\code{signature(object = "portfolio")}: calculate
       shares from price and weight information, and store the results in
     the \code{shares} slot.}
     \item{calcWeights}{\code{signature(object = "portfolio")}: calculate
-    weights from share and price information, and store the results in
-    the \code{weights} slot.}
+      weights from share and price information, and store the results in
+      the \code{weights} slot.}
     \item{create}{\code{signature(object = "portfolio")}: create a
       portfolio object in the same manner as \code{portfolioBasic}, but
-    also compute share amounts.}
+      also compute share amounts.}
+    \item{expandData}{\code{signature(object = "portfolio")}: ... }
+    \item{expose}{\code{signature(object = "portfolio", trades =
+	"trades")}: ... }
+    \item{getYahooData}{\code{signature(object = "portfolio", symbol.var
+	= "character")}: ... }
+    \item{performance}{\code{signature(object = "portfolio")}: ... }
     \item{securityInfo}{\code{signature(object = "portfolio", id =
 	"character")}: display information about position \code{id}
       within this portfolio. }
-	
+    \item{getYahooData}{\code{signature(object = "portfolio", symbol.var
+	= "character")}: Returns data for P/E Ratio, Book Value, Market Cap,
+      Price/Book, and Price/Sales.}
+    \item{updatePrices}{\code{signature(object = "portfolio", id =
+	"character", price = "numeric")}: ... }
   }
 }
 \author{ Jeff Enos \email{jeff@kanecap.com}}

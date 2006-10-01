@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: classes.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests explicitly declared validity functions in AllClasses.R
 ##
@@ -82,3 +82,15 @@ if(class(trial.4) == "try-error"){
                 trial.4[1]))
             )
 }
+
+## Tests the 'validity' method of 'matchedPortfolio'
+
+test <- try(
+            new("matchedPortfolio", formula = y ~ x + z, original = p),
+            silent = TRUE
+            )
+
+stopifnot(
+          as.logical(grep("Error.*validObject.*does not contain columns",
+                          test[1]))
+          )

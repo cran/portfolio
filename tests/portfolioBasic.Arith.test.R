@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: $
+## $Id: portfolioBasic.Arith.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests "+" method of "portfolioBasic"
 ##
@@ -8,21 +8,32 @@
 
 library(portfolio)
 
+load("portfolioBasic.Arith.test.RData")
+
+## save(p.0, p.1, truth, file = "portfolioBasic.Arith.test.RData", compress = TRUE)
+
 ## Constructs data and portfolioBasics that should add ("+") correctly
 
-data.0 <- data.frame(id = 1:20, symbol.var = 1:20,
-                     in.var = 1:20, ret.var = 1:20)
-data.1 <- data.frame(id = 10:30, symbol.var = 10:30,
-                     in.var = 10:30, ret.var = 10:30)
+data.0 <- data.frame(id = as.character(letters[1:20]), in.var = 1:20)
+data.1 <- data.frame(id = as.character(letters[26:7]), in.var = 20:1)
 
 p.0 <- new("portfolioBasic", id.var = "id", symbol.var = "symbol.var",
-              in.var = "in.var", ret.var = "ret.var", type = "equal",
-              size = "quintile", data = data.0)
+              in.var = "in.var", ret.var = "ret.var", type = "sigmoid",
+              size = 10, data = data.0, sides = c("long", "short"))
 
 p.1 <- new("portfolioBasic", id.var = "id", symbol.var = "symbol.var",
-              in.var = "in.var", ret.var = "ret.var", type = "equal",
-              size = "quintile", data = data.1)
+              in.var = "in.var", ret.var = "ret.var", type = "linear",
+              size = 8, data = data.1, sides = c("long", "short"))
 
-p.sum.0 <- p.0 + p.1
+p.0@data$id <- as.character(p.0@data$id)
+p.1@data$id <- as.character(p.1@data$id)
 
-## Need to add test here!
+p.0@weights$id <- as.character(p.0@weights$id)
+p.1@weights$id <- as.character(p.1@weights$id)
+
+p.sum <- p.0 + p.1
+
+stopifnot(
+          isTRUE(all.equal(p.sum, truth)),
+          nrow(p.sum@data) == length(union(p.0@data$id, p.1@data$id))
+          )
