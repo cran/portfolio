@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: nearest.multiple.R 346 2006-10-01 05:08:55Z enos $
+## $Id: nearest.multiple.R 374 2006-10-04 13:33:28Z enos $
 ##
 ## Find the multiple of y nearest to x.
 ##

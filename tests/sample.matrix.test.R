@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: sample.matrix.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: sample.matrix.test.R 374 2006-10-04 13:33:28Z enos $
 ##
 ## Tests that .sample.matrix correctly samples from a matrix of probabilities
 ##

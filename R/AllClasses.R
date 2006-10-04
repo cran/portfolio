@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: AllClasses.R 346 2006-10-01 05:08:55Z enos $
+## $Id: AllClasses.R 374 2006-10-04 13:33:28Z enos $
 ##
 ## Class definitions for the portfolio package.
 ##

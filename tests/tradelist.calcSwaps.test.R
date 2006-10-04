@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.calcSwaps.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: tradelist.calcSwaps.test.R 374 2006-10-04 13:33:28Z enos $
 ##
 ## Tests "calcSwaps" method of "tradelist" class
 ##

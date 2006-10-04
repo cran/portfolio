@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.R 348 2006-10-01 05:31:29Z enos $
+## $Id: tradelist.R 374 2006-10-04 13:33:28Z enos $
 ##
 ## First pass at a trading system that enables daily trading
 ## at a given turnover rate.
@@ -1149,14 +1149,14 @@ setMethod("calcChunksActual",
             ## identified by their column suffixes ('enter' and
             ## 'exit'), I use grep and sub to extract chunks.
             
-            cols.enter <- grep("\.enter", names(swaps.actual), value = TRUE)
+            cols.enter <- grep("\\.enter", names(swaps.actual), value = TRUE)
             chunks.enter <- swaps.actual[cols.enter]
-            names(chunks.enter) <- sub("\.enter", "", names(chunks.enter))
+            names(chunks.enter) <- sub("\\.enter", "", names(chunks.enter))
             chunks.enter <- subset(chunks.enter, id != .dummy.id())
 
-            cols.exit <- grep("\.exit", names(swaps.actual), value = TRUE)
+            cols.exit <- grep("\\.exit", names(swaps.actual), value = TRUE)
             chunks.exit <- swaps.actual[cols.exit]
-            names(chunks.exit) <- sub("\.exit", "", names(chunks.exit))
+            names(chunks.exit) <- sub("\\.exit", "", names(chunks.exit))
             chunks.exit <- subset(chunks.exit, id != .dummy.id())
 
             chunks.actual <- rbind(chunks.enter, chunks.exit)

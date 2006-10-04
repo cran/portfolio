@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.calcCandidates.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: tradelist.calcCandidates.test.R 374 2006-10-04 13:33:28Z enos $
 ##
 ## Tests calcCandidates method of "tradelist" class
 ##
