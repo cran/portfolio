@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: trellis.multiplot.R 374 2006-10-04 13:33:28Z enos $
+## $Id: trellis.multiplot.R 366 2006-10-03 15:04:46Z enos $
 ##
 ## Plot some trellis objects on the same page.
 ##

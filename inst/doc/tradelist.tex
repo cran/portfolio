@@ -1225,10 +1225,10 @@ dummy sell.\protect\footnote{We only show the head of the swaps table.}
 \begin{Schunk}
 \begin{Soutput}
             tca.rank.enter tca.rank.exit rank.gain
-MSFT.4,NA.0            1.9         10000     -9998
 MSFT.1,NA.0            1.9         10000     -9998
 MSFT.2,NA.0            1.9         10000     -9998
 MSFT.3,NA.0            1.9         10000     -9998
+MSFT.4,NA.0            1.9         10000     -9998
 GM.1,NA.0              1.6         10000     -9998
 SCHW.1,NA.0            1.3         10000     -9999
 \end{Soutput}
@@ -1284,7 +1284,14 @@ the portfolio.
 
 \subsection{Accounting for turnover}
 
-As we stated in section \ref{}, holding period would be endogenous if
+\emph{Please note that this and subsequent sections need to account
+  for change in turnover application.  Now all swaps are done such
+  that the total market value of trades goes up to but doesn't exceed
+  the turnover amount.  In the meantime I have adjusted the example's
+  turnover to \$2,000 so that at least one chunk is done, although now
+  Sweave chunks will be inconsistent with the text.}
+
+As we stated earlier, holding period would be endogenous if
 we could always set it to maximise risk-adjusted return.  However,
 most real world portfolios have a set holding period and consequently,
 a set turnover.  There is no real concept of turnover or holding
@@ -1296,14 +1303,14 @@ until the cumulative market value of these trades exceeds the money we
 have to invest.  Analogously, we would say that we want to make the
 best ranked trades until we exceed turnover.
 
-As our turnover in this example is \$1000, all of our
+As our turnover in this example is \$2000, all of our
 trades will not have a market value greater than
-\$1000:
+\$2000:
 
 \begin{Schunk}
 \begin{Soutput}
             tca.rank.enter tca.rank.exit rank.gain
-MSFT.4,NA.0            1.9         10000     -9998
+MSFT.1,NA.0            1.9         10000     -9998
 \end{Soutput}
 \end{Schunk}
 
@@ -1311,7 +1318,7 @@ MSFT is the the best ranked trade.  Consequently, we choose swaps of
 MSFT before choosing other swaps.  We make
 1 because each swap has a value of
 approximately \$2000, and our turnover is
-\$1000.
+\$2000.
 
 \subsection{Actual orders}
 
@@ -1322,7 +1329,7 @@ orders.  We first remove the dummy chunks:
 \begin{Schunk}
 \begin{Soutput}
        side   mv alpha ret.1.d rank.t chunk.shares chunk.mv tca.rank
-MSFT.4    B 6000   1.5   -0.02    1.9            1       60      1.9
+MSFT.1    B 6000   1.5   -0.02    1.9           33     1980      1.9
 \end{Soutput}
 \end{Schunk}
 
@@ -1330,12 +1337,12 @@ Then we combine the chunks to form a single order per candidate:
 
 \begin{Schunk}
 \begin{Soutput}
-     side shares mv alpha ret.1.d rank.t
-MSFT    B      1 60   1.5   -0.02    1.9
+     side shares   mv alpha ret.1.d rank.t
+MSFT    B     33 1980   1.5   -0.02    1.9
 \end{Soutput}
 \end{Schunk}
 
-We now have an order for 1 shares of
+We now have an order for 33 shares of
 MSFT, which is the sum of the chunks of
 MSFT.  Having discussed in words the process of
 trade list creation, we describe, step-by-step, the process of
@@ -2351,9 +2358,9 @@ building a \texttt{tradelist} object in R.
 %% have to invest.  Analogously, we would say that we want to make the
 %% best ranked trades until we exceed turnover.
 
-%% As our turnover in this example is \$1000, all of our
+%% As our turnover in this example is \$2000, all of our
 %% trades will not have a market value greater than
-%% \$1000:
+%% \$2000:
 
 %% <<>>=
 %% tl@swaps.actual[, c("tca.rank.enter", "tca.rank.exit",
@@ -2364,7 +2371,7 @@ building a \texttt{tradelist} object in R.
 %% MSFT before choosing other swaps.  We make
 %% 1 because each swap has a value of
 %% approximately \$2000, and our turnover is
-%% \$1000.
+%% \$2000.
 
 %% \subsection{Actual orders}
 
@@ -2384,7 +2391,7 @@ building a \texttt{tradelist} object in R.
 %% tl@actual[, !names(tl@actual) %in% c("id")]
 %% @
 
-%% We now have an order for 1 shares of
+%% We now have an order for 33 shares of
 %% MSFT, which is the sum of the chunks of
 %% MSFT.  Having discussed in words the process of
 %% trade list creation, we describe, step-by-step, the process of
@@ -3030,7 +3037,6 @@ GOOG.1,AMD.3           B            1.3         S          -1.4       2.8
 SCHW.1,DELL.1          B            1.2         S          -1.2       2.4
 SCHW.2,DELL.2          B            1.2         S          -1.2       2.4
 SCHW.3,DELL.3          B            1.2         S          -1.2       2.4
-GM.2,NA.0              B           -4.1         S       10000.0  -10004.1
 \end{Soutput}
 \end{Schunk}
 
@@ -3098,7 +3104,6 @@ GOOG.1    B  1.10   0.010    1.3      1.3           50     1000     1
 SCHW.1    B  1.20  -0.010    1.2      1.2           40     2000     1
 SCHW.2    B  1.20  -0.010    1.2      1.2           40     2000     2
 SCHW.3    B  1.20  -0.010    1.2      1.2           20     1000     3
-GM.2      B  1.00   0.100    1.9     -4.1           33      990     2
 QCOM.1    S -0.36  -0.005   -1.8     -1.8           11    -2090     1
 QCOM.2    S -0.36  -0.005   -1.8     -1.8           11    -2090     2
 QCOM.3    S -0.36  -0.005   -1.8     -1.8            3     -570     3
@@ -3108,6 +3113,25 @@ AMD.3     S -0.94   0.010   -1.4     -1.4           10    -1000     3
 DELL.1    S -0.15   0.070   -1.2     -1.2           18    -1980     1
 DELL.2    S -0.15   0.070   -1.2     -1.2           18    -1980     2
 DELL.3    S -0.15   0.070   -1.2     -1.2           14    -1540     3
+       dummy.quality
+GM.1            <NA>
+MSFT.1          <NA>
+MSFT.2          <NA>
+MSFT.3          <NA>
+MSFT.4          <NA>
+GOOG.1          <NA>
+SCHW.1          <NA>
+SCHW.2          <NA>
+SCHW.3          <NA>
+QCOM.1          <NA>
+QCOM.2          <NA>
+QCOM.3          <NA>
+AMD.1           <NA>
+AMD.2           <NA>
+AMD.3           <NA>
+DELL.1          <NA>
+DELL.2          <NA>
+DELL.3          <NA>
 \end{Soutput}
 \end{Schunk}
 
@@ -3127,7 +3151,7 @@ actual chunks for each security to form one order per security.
      side shares    mv alpha ret.1.d rank.t
 AMD     S     50 -5000 -0.94   0.010   -1.4
 DELL    S     50 -5500 -0.15   0.070   -1.2
-GM      B    100  3000  1.00   0.100    1.9
+GM      B     67  2010  1.00   0.100    1.9
 GOOG    B     50  1000  1.10   0.010    1.3
 MSFT    B    100  6000  1.50  -0.020    1.6
 QCOM    S     25 -4750 -0.36  -0.005   -1.8
@@ -3795,13 +3819,6 @@ SCHW.2,AMD.2           B            1.3         S          -1.8       3.1
 SCHW.3,AMD.3           B            1.3         S          -1.8       3.1
 GOOG.1,QCOM.1          B            1.2         S          -1.4       2.6
 GM.2,QCOM.2            B           -4.4         S          -1.4      -3.0
-NA.0,HAL.1             X        10000.0         C           1.8   -9998.2
-NA.0,QCOM.3            B       -10000.0         S          -1.4   -9998.6
-NA.0,YHOO.1            X        10000.0         C           1.4   -9998.6
-NA.0,DELL.1            B       -10000.0         S          -1.2   -9998.8
-NA.0,DELL.2            B       -10000.0         S          -1.2   -9998.8
-NA.0,DELL.3            B       -10000.0         S          -1.2   -9998.8
-NA.0,PAYX.1            X        10000.0         C           1.2   -9998.8
 \end{Soutput}
 \end{Schunk}
 
@@ -3844,11 +3861,6 @@ SCHW.2,AMD.2           B            1.3         S          -1.8       3.1
 SCHW.3,AMD.3           B            1.3         S          -1.8       3.1
 GOOG.1,QCOM.1          B            1.2         S          -1.4       2.6
 GM.2,QCOM.2            B           -4.4         S          -1.4      -3.0
-NA.0,HAL.1             X        10000.0         C           1.8   -9998.2
-NA.0,QCOM.3            B       -10000.0         S          -1.4   -9998.6
-NA.0,YHOO.1            X        10000.0         C           1.4   -9998.6
-NA.0,DELL.1            B       -10000.0         S          -1.2   -9998.8
-NA.0,DELL.2            B       -10000.0         S          -1.2   -9998.8
 \end{Soutput}
 \end{Schunk}
 
@@ -3886,13 +3898,26 @@ AMD.2     S -0.94  -0.040   -1.8     -1.8           20    -2000     2
 AMD.3     S -0.94  -0.040   -1.8     -1.8           10    -1000     3
 QCOM.1    S -0.36  -0.005   -1.4     -1.4           11    -2090     1
 QCOM.2    S -0.36  -0.005   -1.4     -1.4           11    -2090     2
-HAL.1     C  1.70   0.001    1.8      1.8           75     1500     1
-QCOM.3    S -0.36  -0.005   -1.4     -1.4            3     -570     3
-YHOO.1    C  1.20  -0.002    1.4      1.4           10      200     1
-DELL.1    S -0.15  -0.020   -1.2     -1.2           18    -1980     1
-DELL.2    S -0.15  -0.020   -1.2     -1.2           18    -1980     2
-DELL.3    S -0.15  -0.020   -1.2     -1.2           14    -1540     3
-PAYX.1    C  0.53  -0.001    1.2      1.2           50     1250     1
+       dummy.quality
+MSFT.1          <NA>
+MSFT.2          <NA>
+MSFT.3          <NA>
+MSFT.4          <NA>
+HPQ.1           <NA>
+GM.1            <NA>
+APPL.1          <NA>
+APPL.2          <NA>
+TXN.1           <NA>
+SCHW.1          <NA>
+SCHW.2          <NA>
+SCHW.3          <NA>
+GOOG.1          <NA>
+GM.2            <NA>
+AMD.1           <NA>
+AMD.2           <NA>
+AMD.3           <NA>
+QCOM.1          <NA>
+QCOM.2          <NA>
 \end{Soutput}
 \end{Schunk}
 
@@ -3913,17 +3938,13 @@ does for a long-only tradelist:
        id side shares    mv alpha ret.1.d rank.t
 AMD   AMD    S     50 -5000 -0.94  -0.040   -1.8
 APPL APPL    X     75 -2250 -0.30  -0.090   -1.2
-DELL DELL    S     50 -5500 -0.15  -0.020   -1.2
 GM     GM    B    100  3000  1.00   0.100    1.6
 GOOG GOOG    B     50  1000  1.10   0.010    1.2
-HAL   HAL    C     75  1500  1.70   0.001    1.8
 HPQ   HPQ    X     50  -750 -1.30  -0.002   -1.7
 MSFT MSFT    B    100  6000  1.50  -0.020    1.9
-PAYX PAYX    C     50  1250  0.53  -0.001    1.2
-QCOM QCOM    S     25 -4750 -0.36  -0.005   -1.4
+QCOM QCOM    S     22 -4180 -0.36  -0.005   -1.4
 SCHW SCHW    B    100  5000  1.20  -0.010    1.3
 TXN   TXN    X     25  -625 -0.50  -0.010   -1.2
-YHOO YHOO    C     10   200  1.20  -0.002    1.4
 \end{Soutput}
 \end{Schunk}
 

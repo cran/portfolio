@@ -1,4 +1,10 @@
+Version: 0.3-2 (2007-01-08, released)
+
+	* Fixed test case to handle new default of integer row.names in
+	zero-length data frames.
+
 Version: 0.3-1 (2006-10-04, released)
+
 	* Fixed invalid character escape sequences.
 
 Version: 0.3-0 (2006-10-01, released)

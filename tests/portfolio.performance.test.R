@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.performance.test.R 374 2006-10-04 13:33:28Z enos $
+## $Id: portfolio.performance.test.R 383 2007-01-08 22:26:03Z enos $
 ##
 ## Tests the performance method of class portfolio.
 ##
@@ -16,6 +16,11 @@ result <- performance(test.portfolio, test.market.data)
 
 empty.result <- performance(empty.portfolio, test.market.data)
 
+## Set row.names explicitly to a character vector, since the default
+## is different in R 2.5.0 than in 2.4.x and we want the test to pass
+## in both.
+
+row.names(empty.result@ret.detail) <- as.character(row.names(empty.result@ret.detail))
 
 stopifnot(
           all.equal(result, truth),

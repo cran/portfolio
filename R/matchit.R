@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-## $Id: matchit.R 374 2006-10-04 13:33:28Z enos $
+## $Id: matchit.R 366 2006-10-03 15:04:46Z enos $
 ##
 ## Functions have been prepended with "." and need to be called with
 ## namespace prefix since they're not exported.

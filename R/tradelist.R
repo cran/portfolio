@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.R 374 2006-10-04 13:33:28Z enos $
+## $Id: tradelist.R 379 2006-10-30 16:50:02Z enos $
 ##
 ## First pass at a trading system that enables daily trading
 ## at a given turnover rate.
@@ -875,35 +875,38 @@ setMethod("calcSwaps",
             ## specific to each side, so we don't mind this loss of
             ## generality.  Also, ensure that there are no null side
             ## buckets (only empty data frames).
-            
-            split.chunks <- split(object@chunks, object@chunks$side)
 
-            ## if any one of the types of trades are missing, set the
+            chunks <- object@chunks
+            chunks$dummy.quality <- NA
+            
+            split.chunks <- split(chunks, object@chunks$side)
+
+            ## If any one of the types of trades are missing, set the
             ## data fame for that type (buy, sell, etc..) to have 0
             ## rows and the same columns as the data frame in the
             ## chunks slot
 
             if(is.null(split.chunks$B))
-              buys <- object@chunks[FALSE,]
+              buys <- chunks[FALSE,]
             else buys <- split.chunks$B
             
             if(is.null(split.chunks$S))
-              sells <- object@chunks[FALSE,]
+              sells <- chunks[FALSE,]
             else sells <- split.chunks$S
 
             if(is.null(split.chunks$C))
-              covers <- object@chunks[FALSE,]
+              covers <- chunks[FALSE,]
             else covers <- split.chunks$C
 
             if(is.null(split.chunks$X))
-              shorts <- object@chunks[FALSE,]
+              shorts <- chunks[FALSE,]
             else shorts <- split.chunks$X
             
             to.equity.long  <-   object@target.equity - object@mv.long.orig
             to.equity.short <- - object@target.equity - object@mv.short.orig
 
 
-            if (object@to.equity) {
+            if(object@to.equity) {
 
               ## Creation of dummy chunks in order to get to target
               ## equity.
@@ -921,11 +924,12 @@ setMethod("calcSwaps",
               
               if(to.equity.long > 0){
                 dummy.sells <- dummyChunks(object,
-                                            "S", to.equity.long, "good")
+                                           "S", to.equity.long, "good")
                 sells <- rbind(sells, dummy.sells)
-              }else if(to.equity.long < 0){
+              }
+              else if(to.equity.long < 0){
                 dummy.buys  <- dummyChunks(object,
-                                            "B", to.equity.long, "good")
+                                           "B", to.equity.long, "good")
                 buys <- rbind(buys, dummy.buys)
               }
 
@@ -934,11 +938,12 @@ setMethod("calcSwaps",
 
               if(to.equity.short > 0){
                 dummy.shorts <- dummyChunks(object,
-                                             "X", to.equity.short, "good")
+                                            "X", to.equity.short, "good")
                 shorts <- rbind(shorts, dummy.shorts)
-              }else if(to.equity.short < 0){
+              }
+              else if(to.equity.short < 0){
                 dummy.covers <- dummyChunks(object,
-                                             "C", to.equity.short, "good")
+                                            "C", to.equity.short, "good")
                 covers <- rbind(covers, dummy.covers)
               }
             }
@@ -1112,6 +1117,23 @@ setMethod("calcSwapsActual",
             swaps.actual <- subset(swaps, cumsum(abs(chunk.mv.enter) +
                                                  abs(chunk.mv.exit)) <= object@turnover)
 
+            ## If to.equity == TRUE, however, we don't want to worsen
+            ## exposure by doing the last set of remaining trades.
+            ## For each side we first want to do swaps with dummy
+            ## chunks intended to bring us closer to target.equity,
+            ## then any swaps not including dummy chunks.
+
+            ## When we computed swaps, if to.equity == TRUE, we tagged
+            ## each swap with a T/F flag indicating whether it did, in
+            ## fact, help us get to the target equity as described
+            ## above.  As far as our representation, this means we
+            ## don't want to do any swap that involves a chunk with
+            ## dummy.quality %in% "bad".
+
+            if(object@to.equity){
+              swaps.actual <- subset(swaps.actual, ! (dummy.quality.enter %in% "bad" | dummy.quality.exit %in% "bad"))
+            }
+            
             object@swaps.actual <- swaps.actual
 
             object
@@ -1623,6 +1645,8 @@ setMethod("dummyChunks",
           "tradelist",
           function(object, side, total.usd, quality){
 
+            stopifnot(quality %in% c("good","bad"))
+            
             dummy.chunk <- data.frame(id = 0)
             dummy.chunk[chunksCols(object)] <- NA
 
@@ -1653,8 +1677,11 @@ setMethod("dummyChunks",
               stop("Invalid value for quality")
 
             dummy.chunk$tca.rank <- dummy.chunk$rank.t
-            
 
+            ## Record the dummy chunk quality in the dummy.quality
+            ## column.
+
+            dummy.chunk$dummy.quality <- quality
             
             num.needed <- round(abs(total.usd) / abs(object@chunk.usd))
 

@@ -61,7 +61,7 @@ data <- data.list[["data.abs"]]
 sorts <- list(alpha = 1.5, ret.1.d = 1)
 
 tl <- new("tradelist", orig = p.current, target = p.target, sorts =
-sorts, turnover = 1000, chunk.usd = 2000, data = data)
+sorts, turnover = 2000, chunk.usd = 2000, data = data, to.equity = FALSE)
 
 @
 
@@ -1226,7 +1226,14 @@ the portfolio.
 
 \subsection{Accounting for turnover}
 
-As we stated in section \ref{}, holding period would be endogenous if
+\emph{Please note that this and subsequent sections need to account
+  for change in turnover application.  Now all swaps are done such
+  that the total market value of trades goes up to but doesn't exceed
+  the turnover amount.  In the meantime I have adjusted the example's
+  turnover to \$2,000 so that at least one chunk is done, although now
+  Sweave chunks will be inconsistent with the text.}
+
+As we stated earlier, holding period would be endogenous if
 we could always set it to maximise risk-adjusted return.  However,
 most real world portfolios have a set holding period and consequently,
 a set turnover.  There is no real concept of turnover or holding
