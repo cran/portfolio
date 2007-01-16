@@ -6,6 +6,16 @@
 ##
 ################################################################################
 
+setMethod("initialize",
+          signature(.Object = "performance"),
+          function(.Object, ...){
+            if(nrow(.Object@ret.detail) == 0){
+              row.names(.Object@ret.detail) <- integer(0)
+            }
+            .Object
+          }
+          )
+
 setMethod("show",
           signature(object = "performance"),
           function(object){

@@ -2,6 +2,7 @@
 \docType{class}
 \alias{performance-class}
 \alias{plot,performance,missing-method}
+\alias{initialize,performance-method}
 \alias{show,performance-method}
 \alias{summary,performance-method}
 

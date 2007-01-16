@@ -13,6 +13,7 @@
 
 \alias{expandData,portfolio-method}
 \alias{expose,portfolio,trades-method}
+\alias{initialize,portfolio-method}
 \alias{performance,portfolio-method}
 \alias{portfolioDiff,portfolio,portfolio-method}
 \alias{updatePrices,portfolio,character,numeric-method}

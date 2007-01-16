@@ -11,11 +11,11 @@ Classes for analysing and implementing equity portfolios.
 \details{
 \tabular{ll}{
 Package: \tab portfolio\cr
-Version: \tab 0.3-2\cr
-Date: \tab 2007-01-08\cr
+Version: \tab 0.3-3\cr
+Date: \tab 2007-01-16\cr
 Depends: \tab R (>= 2.4.0), methods, graphics, grid, lattice, nlme\cr
 License: \tab GPL version 2 or later.\cr
-Built: \tab R 2.4.1; ; 2007-01-08 17:20:58; unix\cr
+Built: \tab R 2.4.1; ; 2007-01-16 13:36:30; unix\cr
 }
 
 Index:

@@ -1,3 +1,8 @@
+Version: 0.3-3 (2007-01-16, released)
+
+	* Set default row.names of data frames in class prototypes to
+	integer() so that tests pass under 2.4.x and 2.5.x.
+
 Version: 0.3-2 (2007-01-08, released)
 
 	* Fixed test case to handle new default of integer row.names in

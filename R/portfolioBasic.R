@@ -15,6 +15,13 @@ setMethod("initialize",
           signature(.Object = "portfolioBasic"),
           function(.Object, ...){
 
+            if(nrow(.Object@data) == 0){
+              row.names(.Object@data) <- integer(0)
+            }
+            if(nrow(.Object@weights) == 0){
+              row.names(.Object@data) <- integer(0)
+            }
+            
             .Object <- callNextMethod()
             create(.Object)
           }

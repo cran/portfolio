@@ -8,6 +8,17 @@
 ##
 ################################################################################
 
+setMethod("initialize",
+          signature(.Object = "portfolio"),
+          function(.Object, ...){
+            .Object <- callNextMethod()
+
+            if(nrow(.Object@shares) == 0){
+              row.names(.Object@shares) <- integer(0)
+            }
+            .Object
+          }
+          )
 
 ## Calculate weights from shares.
 ##
