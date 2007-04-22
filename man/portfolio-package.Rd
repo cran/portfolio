@@ -11,11 +11,11 @@ Classes for analysing and implementing equity portfolios.
 \details{
 \tabular{ll}{
 Package: \tab portfolio\cr
-Version: \tab 0.3-3\cr
-Date: \tab 2007-01-16\cr
+Version: \tab 0.4-0\cr
+Date: \tab 2007-04-22\cr
 Depends: \tab R (>= 2.4.0), methods, graphics, grid, lattice, nlme\cr
 License: \tab GPL version 2 or later.\cr
-Built: \tab R 2.4.1; ; 2007-01-16 13:36:30; unix\cr
+Built: \tab R 2.5.0; ; 2007-04-22 19:13:39; unix\cr
 }
 
 Index:
@@ -29,6 +29,8 @@ global.2004             Security data of large global companies for
 map.market              Create a Map of the Market
 matchedPortfolio-class
                         Class "matchedPortfolio"
+matchedPortfolioCollection-class
+                        Class "matchedPortfolioCollection"
 performance-class       Class "performance"
 portfolio-class         Class "portfolio"
 portfolio-package       Analysing equity portfolios

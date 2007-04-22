@@ -152,9 +152,9 @@ Consider a portfolio formed by taking equal-weighted short positions
 in each of the Assay Focus List stocks and focusing in the returns for the
 first three months, through March 31, 2005.
 
-
 \begin{Schunk}
 \begin{Sinput}
+> assay$assay.wt <- ifelse(assay$on.fl, -1, NA)
 > p <- new("portfolioBasic", name = "AFL Portfolio", instant = as.Date("2004-12-31"), 
 +     data = assay, id.var = "symbol", in.var = "assay.wt", type = "relative", 
 +     size = "all", ret.var = "ret.0.3.m")
@@ -358,6 +358,9 @@ information is incorporated into the price.
 
 \subsection{Making a match}
 
+\emph{Note: Due to internal changes to the package there may be some
+  inconsistencies in this and subsequent sections of the document.}\\
+
 We want a matching portfolio which is as similar as possible to the
 AFL portfolio but which does not include the same stocks.  The
 \texttt{matching} method in the \texttt{portfolio} package provides
@@ -378,23 +381,18 @@ the \texttt{covariates} argument:
 > summary(p.m)
 \end{Sinput}
 \begin{Soutput}
-An object of class "matchedPortfolio":
+Matched portfolio summary: AFL Portfolio
 
-slots:
+1 matches using greedy matching.
 
-formula: treatment ~ country + sector + liquidity
+Matched portfolio returns:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.048   0.048   0.048   0.048   0.048   0.048 
 
+Original portfolio return: 0.076, with 0 NAs.
+Original return relative to matches: 0.029
 
-original:
-   33 positions. 
-   0.076 ret.0.3.m 
-
-matches: 
-   33 positions. 
-   1 matched portfolio 
-   0.048 ret.0.3.m 
-
-Difference in returns: 0.029 
+Original portfolio outperformed 100% of matches.
 \end{Soutput}
 \end{Schunk}
 
@@ -403,8 +401,7 @@ of the positions of \texttt{p.m} appear in \texttt{p}.
 
 \begin{Schunk}
 \begin{Sinput}
-> all(!dimnames(p.m@matches[p.m@matches[, 1] != 0, ])[[1]] %in% 
-+     p@weights$id)
+> all(!p.m@matches[, 1] %in% p@weights$id)
 \end{Sinput}
 \begin{Soutput}
 [1] TRUE
@@ -468,8 +465,8 @@ is quite close to \texttt{p.m}'s exposure to liquidity:
 \end{Sinput}
 \begin{Soutput}
 $liquidity
-       1 
--0.00012 
+    1 
+-0.49 
 \end{Soutput}
 \end{Schunk}
 

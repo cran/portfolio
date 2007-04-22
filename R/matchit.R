@@ -1,115 +1,143 @@
 ###############################################################################
 ##
-## $Id: matchit.R 366 2006-10-03 15:04:46Z enos $
+## $Id: matchit.R 389 2007-01-10 04:28:44Z enos $
 ##
 ## Functions have been prepended with "." and need to be called with
 ## namespace prefix since they're not exported.
 ##
 ################################################################################
 
-.matchit <- function(formula,
+.matchit <- function(f,
                      data,
-                     exact   = character(),
-                     method = "greedy",
+                     treat.var = NULL,
+                     exact     = character(),
+                     method    = "greedy",
                      n.matches = 1,
-                     verbose = FALSE
+                     verbose   = FALSE
                      ){ 
 
-  ## "formula is a formula such as y ~ x + z. "data" is a data frame
+  ## "f is a formula such as y ~ x + z. "data" is a data frame
   ## containing values for the formula. "verbose" is a logical value
   ## specifying whether extra information should be output.
 
   stopifnot(
-            identical(class(formula), "formula"),
             is.logical(verbose),
             is.data.frame(data),
             is.character(exact),
-            all(all.vars(formula) %in% names(data)),
             all(exact %in% names(data))
             )
 
-  if(length(exact) > 0 && method != "greedy"){
-    stop("Exact matching may only be done using the greedy method")
+  stopifnot(method %in% c("greedy","sample","random"))
+
+  if(method %in% "greedy" && n.matches > 1){
+    stop("Greedy matching cannot provide more than 1 match. Set n.matches = 1.")
   }
   
-  ## extracts the left and right-hand sides of the formula
+  ## Compute treat.var and covarites from the formula 'f', if one is
+  ## supplied.  At the very least, we must be armed with a treat.var.
+  
+  covariates <- NULL
+  if(!missing(f) && !is.null(f)){
 
-  treat.var  <- all.vars(getResponseFormula(formula))
-  covariates <- all.vars(getCovariateFormula(formula))
-  
-  ## Case: data includes NAs, remove NAs from data and, report to user
-  ## information about these NAs
-  
-  if(any(is.na(data))){
-    data <- .remove.nas(data, treat.var, covariates, verbose)
+    stopifnot(is(f, "formula"),
+              all(all.vars(f) %in% names(data)))
+
+    if(length(f) != 3){
+      stop("f must be a two-sided formula")
+    }
+    
+    if(!is.null(treat.var)){
+      warning("treat.var parameter overridden by formula f")
+    }
+    
+    treat.var  <- all.vars(getResponseFormula(f))
+    covariates <- all.vars(getCovariateFormula(f))
+
+    if(isTRUE(all.equal(method, "random"))){
+      warning("Covariates in formula ignored when using random matching")
+    }
+  }
+  else if(method %in% c("greedy", "sample")){
+    stop("Formula required for methods 'greedy' and 'sample'")
+  }
+  else{
+    stopifnot(!is.null(treat.var))
   }
 
-  x <- .valid.data(treat.var, covariates, data)
-  
-  ## calculates propensity scores
+  ## No missing data in any of the required columns is allowed.
+  ##
+  ## Note that we used to allow missing data here, but we were only
+  ## reporting to use via cat/warning that a certain number were
+  ## removed.  A result object is required for keeping track of
+  ## removed NA's in a systematic way, so we will add back NA handling
+  ## when we include one, possibly with an 'na.rm' parameter.
 
-  x$ps <- .ps(formula, x)
-  
-  ## if no controls to match to, use greedy matching
+  if(any(is.na(data[c(treat.var, covariates, exact)]))){
+    stop("NA's not allowed in formula term, 'treat.var', and 'exact' data columns")
+  }
 
-  if(nrow(x[!x[[treat.var]],]) < 1){
-    method <- "greedy"
+  ## Prep the data by converting character vectors to factors, etc.,
+  ## and checking some properties.  May stop.
+  
+  x <- .data.prep(treat.var, covariates, data)
+
+  ## Calulate propensity score if necessary.
+  
+  if(method %in% c("greedy", "sample")){
+    x$ps <- .ps(f, x)
   }
   
   if(length(exact) > 0){
 
-    ## Compute each distinct tuple of values in the columns
-    ## specified by 'exact'.
-    
-    x.treat <- x[x[[treat.var]],]
-    x.treat$exact <- do.call(paste, as.list(x.treat[exact]))
-    exact.combos <- as.matrix(x.treat[!duplicated(x.treat$exact), exact])
-
-    ## Call .calc.greedy on each subset.
-    
-    res <- NULL
-    
-    if(nrow(exact.combos) > 0){
-      for(i in 1:nrow(exact.combos)){
-
-        exact.combo <- unlist(exact.combos[i,])
-        cond <- parse(text = paste(names(exact.combo), " == \"",
-                        exact.combo, "\"", sep = "", collapse = " & "))
-        x.sub <- subset(x, eval(cond))
-        res.sub <- .calc.greedy(x.sub, treat.var)
-        res <- rbind(res, res.sub)
-      }
-    }
-    else{
-      stop("Supplied columns in exact produce no categories")
-    }
+    res <- do.call(rbind, lapply(split(x, do.call(paste, as.list(x[exact]))),
+                                 function(x){
+                                   .do.matching(method, x, treat.var, n.matches)
+                                 }
+                                 )
+                   )
   }
-  else if(identical(method, "greedy")){
-    
-    res <- .calc.greedy(x, treat.var)
-   
+  else{
+    res <- .do.matching(method, x, treat.var, n.matches)
   }
-  else if(identical(method, "sample")){
-
-    res <- .sample.matching(x, treat.var, n.matches)
-
-  }
-
+  
   ## Returns a matrix of matches.  The row names are the names of the
   ## treated observations, and each column contains a set of
   ## matches. 
 
   res
-
 }
 
-.calc.greedy <- function(x, treat.var){
-  
+## .do.matching provides some basic checks on the input to the various
+## matching sub-functions.
+
+.do.matching <- function(method, x, treat.var, n.matches){
+
+  if(sum(x[[treat.var]]) == 0){
+    res <- NULL
+  }
+  else if(sum(!x[[treat.var]]) == 0){
+    stop("No controls found for treatment")
+  }
+  else{
+    
+    method.fun <- paste(".", method, ".matching", sep = "")
+    res <- do.call(method.fun, list(x = x,
+                                    treat.var = treat.var,
+                                    n.matches = n.matches))
+  }
+
+  res
+}
+
+.greedy.matching <- function(x, treat.var, n.matches){
+
   ## "x" is a data frame containing a vector of propensity scores,
   ## "ps", and a logical vector, "treat.var", specifying whether or
   ## not a unit received treatment.  Returns "x" with an additional
   ## column appended, "matches", which specifies the row name that an
   ## observation has been matched to.
+
+  stopifnot("ps" %in% names(x))
 
   ## creates a vector of NAs to keep track of all the matches made
 
@@ -154,9 +182,9 @@
 }
 
 .sample.matching <- function(x, treat.var, n.matches){
-  
+
   ## "x" is a data frame containing a column of propensity scores,
-  ## "ps", and a column of logical values named "treat.var" wthat
+  ## "ps", and a column of logical values named "treat.var" that
   ## indicates whether an observation has reserved treatment.
   ## n.matches is the number of sets of matches to be created.
   ## Returns a i x j matrix where i equals the number of observations
@@ -164,6 +192,8 @@
   ## that don't recieve treatment.  The row names are the row names of
   ## the units that receive treatment, and the cell values are the row
   ## names of the observations to which they have been matched.
+
+  stopifnot("ps" %in% names(x))
 
   ## creates an sum(x[[treat.var]]) x sum(!x[[treat.var]]) matrix of
   ## differences in propensity scores.
@@ -179,6 +209,37 @@
   ## creates a matrix to store all the matches
 
   .sample.matrix(probs, n.matches)
+
+}
+
+.random.matching <- function(x, treat.var, n.matches){
+
+  treated <- row.names(x)[x[[treat.var]]]
+  
+  res <- matrix(nrow = length(treated),
+                ncol = n.matches,
+                dimnames = list(treated, 1:n.matches)
+                )
+
+  for(i in 1:n.matches){
+
+    ## Sampling here is equal weighted, with replacement.  Note that
+    ## treatment obs are not allowed in the match.
+
+    ## sample() doesn't work on a charactor vector of length 1, so
+    ## handle separately.
+
+    if(sum(!x[[treat.var]]) == 1){
+      res[,i] <- row.names(x)[!x[[treat.var]]]
+    }
+    else{
+      res[,i] <- sample(row.names(x)[!x[[treat.var]]],
+                        size = nrow(res),
+                        replace = TRUE)
+    }
+  }
+
+  res
 
 }
 
@@ -304,7 +365,7 @@
   which.min(distances)
 }
 
-.valid.data <- function(treat.var, covariates, data){
+.data.prep <- function(treat.var, covariates = NULL, data){
 
   ## Checks that user-supplied data is in proper form, corrects it if
   ## necessary, then returns it "treat.var" is a column of logical or
@@ -318,8 +379,17 @@
     stop("Response variable must be logical.", call. = FALSE)
   }
 
-  ## any character covariates must be stored as factors for "glm" to
-  ## work properly
+  if(sum(data[[treat.var]]) == 0){
+    stop("There must be at least one treated value")
+  }
+
+  if(sum(!data[[treat.var]]) == 0){
+    stop("There must be at least one non-treated value")
+  }
+    
+  
+  ## Any character covariates must be stored as factors for "glm" to
+  ## work properly.  If covariates = NULL, nothing is done.
   
   for(i in covariates){
     if(identical(class(data[[i]]), "character")){
@@ -331,9 +401,7 @@
 
 }
 
-
-
-.remove.nas <- function(data, treat.var, covariates, verbose = FALSE){
+.remove.nas <- function(data, treat.var, covariates = NULL, verbose = FALSE){
   
   ## "data" is a data frame containing columns for "treat.var" and the
   ## "covariates". "verbose" is a logical scalar and tells the user
@@ -342,8 +410,13 @@
   ## columns
 
   omit <- FALSE
+
+  cols <- treat.var
+  if(!is.null(covariates)){
+    cols <- c(treat.var, covariates)
+  }
   
-  for(i in c(treat.var, covariates)){
+  for(i in cols){
 
     x <- data[[i]]
     x <- is.na(x)
@@ -370,7 +443,7 @@
 
     for(i in names(nas)){
 
-      if(isTRUE(i %in% c(treat.var, covariates))){
+      if(isTRUE(i %in% cols)){
         cat(i, "contains", nas[i], "NA(s)\n")
       }
     }

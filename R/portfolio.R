@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolio.R 411 2007-04-22 19:29:16Z enos $
 ##
 ## A more complex, full-featured portfolio object that includes
 ## shares, a notion of equity, and is better suited for use in
@@ -31,6 +31,18 @@ setMethod("calcWeights",
           "portfolio",
           function (object){
 
+            ## There are some checks on weight.style and equity in the
+            ## validity method for class 'portfolio', but we repeat
+            ## some here to be safe.  This method is usually called on
+            ## an object that isn't valid (after, say, specifying
+            ## shares and wanting to calculate weights to make the
+            ## object valid).  Is there a better way to handle this?
+
+            stopifnot(is.character(object@weight.style) &&
+                      length(object@weight.style) == 1 &&
+                      object@weight.style %in% c("sides.separate", "long.tmv",
+                                                 "short.tmv", "reference.equity"))
+            
             ## Nothing to do here if there are no positions.
             
             if(nrow(object@shares) == 0)
@@ -46,13 +58,33 @@ setMethod("calcWeights",
 
             x$mv <- x$shares * x[[object@price.var]]
 
-            ## Weight is position dollars/total side dollars.
-            ## Should we also include bps in the weights data frame?
+            mv.long  <- mvLong(object)
+            mv.short <- mvShort(object)
 
-            mvLong  <- mvLong(object)
-            mvShort <- mvShort(object)
+            if(isTRUE(all.equal(object@weight.style, "sides.separate"))){
+              weight.denom <- ifelse(x$shares > 0, mv.long, abs(mv.short))
+            }
+            else if(isTRUE(all.equal(object@weight.style, "long.tmv"))){
+              weight.denom <- mv.long
+            }
+            else if(isTRUE(all.equal(object@weight.style, "short.tmv"))){
+              weight.denom <- abs(mv.short)
+            }
+            else if(isTRUE(all.equal(object@weight.style, "reference.equity"))){
 
-            x$weight <- x$mv / ifelse(x$shares > 0, mvLong, abs(mvShort))
+              if(is.null(object@equity) ||
+                 length(object@equity) != 1){
+                stop(paste("Valid equity slot contents required",
+                           "for reference.equity weight.style"))
+              }
+              
+              weight.denom <- object@equity
+            }
+            else{
+              stop("Invalid weight.style")
+            }
+            
+            x$weight <- x$mv / weight.denom
             
             object@weights <- x[c("id","weight")]
 
@@ -76,7 +108,7 @@ setMethod("calcWeights",
 setMethod("calcShares",
           "portfolio",
           function(object){
-
+            
             ## Nothing to do here if there are no positions.
             
             if(nrow(object@weights) == 0)
@@ -129,14 +161,15 @@ setMethod("create",
           }
           )
 
-## Long/Short market value calculations.  There are some ambiguities
-## that come up when calculating mv from weights (such as what to do
-## with fractional shares) so require shares for now.
+## Long/Short market value calculations based on shares and price.
+## Note that a valid object is not required here, to aid such
+## situations as calculating weights for the first time from a set of
+## shares.
 
 setMethod("mvLong",
           "portfolio",
           function(object){
-
+            
             if(nrow(object@shares) == 0)
               return(0)
 
@@ -156,7 +189,7 @@ setMethod("mvLong",
 setMethod("mvShort",
           "portfolio",
           function(object){
-
+            
             if(nrow(object@shares) == 0)
               return(0)
 
@@ -269,6 +302,9 @@ setMethod("+",
           signature(e1 = "portfolio", e2 = "portfolio"),
           function(e1, e2){
 
+            validObject(e1)
+            validObject(e2)
+            
             r.basic <- callNextMethod()
             r <- new("portfolio", type = "unknown", size = "unknown")
             r@data <- r.basic@data
@@ -301,6 +337,10 @@ setMethod("+",
               
               w$shares <- w$shares.e1 + w$shares.e2
               r@shares <- w[c("id","shares")]
+
+              ## Remove entries that now have zero shares.
+
+              r@shares <- subset(r@shares, is.na(shares) | shares != 0)
             }
             return(r)
           }
@@ -420,19 +460,28 @@ setMethod("getYahooData",
           )
 
 ## "Expose" a portfolio with a data.frame of trades, that is, apply a
-## set of trades to an existing portfolio and return the resulting
-## portfolio.
+## set of trades to the set of positions (shares) of an existing
+## portfolio and return the resulting portfolio.
+
+## It's pretty clear that we shouldn't automatically recalculate
+## weights in this method.  However, I believe we should return an
+## object that is valid.  Invalidity can arise when trades close or
+## open a position.  After that occurs, the weights data frame will
+## have a different set of securities than the shares data frame.
+
+## For now, we add a row to the weights data frame for newly opened
+## positions with NA weight.  Positions that are closed by expose()
+## have their corresponding weights data frame entries removed.  All
+## other values in the weights data frame stay the same.
 
 setMethod("expose",
           signature(object = "portfolio", trades = "trades"),
           function(object, trades){
-
+            
             ## Verify we're working with valid objects:
 
-            stopifnot(
-                      validObject(object),
-                      validObject(trades)
-                      )
+            validObject(object)
+            validObject(trades)
             
             trades <- trades@trades
             
@@ -482,7 +531,7 @@ setMethod("expose",
                  any(x$side %in% c("C","S") & abs(x$shares.exp) > abs(x$shares.orig))
                  ){
                 
-                ## These error message can be much more informative.
+                ## This error message can be much more informative.
                 
                 stop("Illegal trades found")
                 
@@ -502,6 +551,20 @@ setMethod("expose",
 
               object@shares <- x[c("id","shares")]
 
+              ## Now clean up weights data frame.  First, remove
+              ## weights for closed positions.
+
+              object@weights <- subset(object@weights, id %in% object@shares$id)
+
+              ## Then add NA weights for opened positions.
+              
+              new.weights <- subset(object@shares, !id %in% object@weights$id)
+              if(nrow(new.weights) > 0){
+                names(new.weights) <- c("id","weight")
+                new.weights$weight <- NA
+                object@weights <- rbind(object@weights, new.weights)
+              }
+              
               object
             }
 
@@ -510,8 +573,11 @@ setMethod("expose",
               object <- .expose(object, trades.sc)
             }
 
-            object <- calcWeights(object)
-            object
+            ## Require the caller to calc weights.
+            
+            ## object <- calcWeights(object)
+            
+            invisible(object)
           }
           )
 
@@ -539,11 +605,11 @@ setMethod("performance",
             validObject(object)
 
             if(is.null(market.data)){
-
+              
               ## If we're not supplied market data, use
               ## portfolioBasic's performance calculation.
               
-              invisible(callNextMethod())
+              return(invisible(callNextMethod()))
               
             }
 
@@ -591,10 +657,8 @@ setMethod("performance",
             ## for now because we may do away with id.var.
             
             stopifnot(is.data.frame(market.data),
-                      all(c("id","start.price","ret","end.price","ret")
+                      all(c("id","start.price","end.price","ret")
                           %in% names(market.data)))
-            
-            
 
             ## If this portfolio is empty, return the default
             ## performance object with itself as t-plus-one.
@@ -686,6 +750,8 @@ setMethod("contribution",
           signature(object = "portfolio", contrib.var = "character"),
           function(object, contrib.var, buckets = 5, market.data){
 
+            validObject(object)
+            
             x <- object@data
 
             stopifnot(all(contrib.var %in% names(x)))
@@ -861,5 +927,68 @@ setMethod("expandData",
               object@data   <- rbind(object@data, data.addl)
             }
             object
+          }
+          )
+
+
+setMethod("summary",
+          signature(object = "portfolio"),
+          function(object){
+
+            validObject(object)
+            
+            weight.col <- ifelse(nrow(object@weights) > 200, "bps", "pct")
+            x <- .summary.prep.df(object, weight.col)
+
+            x$shares <- object@shares$shares[match(x$id, object@shares$id)]
+            x$value  <- x$shares * x[[object@price.var]]
+            
+            columns  <- c("id", weight.col)
+            disp.num <- 5
+            
+            long  <- subset(x, weight > 0)
+            short <- subset(x, weight < 0)
+
+            cat("Portfolio: ", object@name, "\n\n",
+                sprintf("       %6s %12s %15s", "count", "weight", "value"), "\n",
+
+                ifelse("long" %in% object@sides,
+                       paste(
+                             sprintf("Long:  %6s %12s %15s",
+                                     prettyNum(nrow(long), big.mark = ","),
+                                     prettyNum(sum(long$weight), big.mark = ","),
+                                     prettyNum(round(sum(long$value, na.rm = TRUE)), big.mark = ",")
+                                     ), "\n"),
+                       ""),
+                ifelse("short" %in% object@sides,
+                       paste(
+                             sprintf("Short: %6s %12s %15s",
+                                     prettyNum(nrow(short), big.mark = ","),
+                                     prettyNum(sum(short$weight), big.mark = ","),
+                                     prettyNum(round(sum(short$value, na.rm = TRUE)), big.mark = ",")
+                                     ), "\n"),
+                       ""),
+                "\n",
+                "Top/bottom positions by weight:\n",
+                sep = "")
+
+            ## The following section will be expanded to include
+            ## more top/bottom summaries akin to our perl portfolio
+            ## summary.  Currently, the only data frame we show is
+            ## sorted by weight.
+
+            by.weight <- x[order(-x$weight, na.last = NA),]
+            if(disp.num * 2 > nrow(by.weight)){
+              show(by.weight[columns])
+            }
+            else{
+              show(rbind(head(by.weight, n = disp.num),
+                         tail(by.weight, n = disp.num))[columns])
+            }
+            
+            if(nrow(x[is.na(x$weight),]) > 0){
+              cat("\nNA weight:\n")
+              show(x[is.na(x$weight),][columns])
+            }
           }
           )

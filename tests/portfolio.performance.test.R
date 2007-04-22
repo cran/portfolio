@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.performance.test.R 383 2007-01-08 22:26:03Z enos $
+## $Id: portfolio.performance.test.R 384 2007-01-09 03:27:22Z enos $
 ##
 ## Tests the performance method of class portfolio.
 ##
@@ -23,6 +23,12 @@ empty.result <- performance(empty.portfolio, test.market.data)
 row.names(empty.result@ret.detail) <- as.character(row.names(empty.result@ret.detail))
 
 stopifnot(
-          all.equal(result, truth),
+          all.equal(result@ret, truth@ret),
+          all.equal(result@profit, truth@profit),
+          all.equal(result@missing.price, truth@missing.price),
+          all.equal(result@missing.return, truth@missing.return),
+          all.equal(result@ret.detail, truth@ret.detail),
+          all.equal(result@t.plus.one, truth@t.plus.one),
+          
           all.equal(empty.result, empty.truth)
           )

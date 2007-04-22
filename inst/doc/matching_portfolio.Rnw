@@ -140,12 +140,8 @@ Consider a portfolio formed by taking equal-weighted short positions
 in each of the Assay Focus List stocks and focusing in the returns for the
 first three months, through March 31, 2005.
 
-<<flagging focus list stocks, echo=false>>=
-assay$assay.wt <- ifelse(assay$on.fl, -1, NA)
-@ 
-
 <<creating assay portfolio>>=
-
+assay$assay.wt <- ifelse(assay$on.fl, -1, NA)
 p <- new("portfolioBasic",
          name    = "AFL Portfolio",
          instant = as.Date("2004-12-31"),
@@ -305,6 +301,9 @@ information is incorporated into the price.
 
 \subsection{Making a match}
 
+\emph{Note: Due to internal changes to the package there may be some
+  inconsistencies in this and subsequent sections of the document.}\\
+
 We want a matching portfolio which is as similar as possible to the
 AFL portfolio but which does not include the same stocks.  The
 \texttt{matching} method in the \texttt{portfolio} package provides
@@ -326,7 +325,7 @@ A quick inspection of the new portfolio's positions confirms that none
 of the positions of \texttt{p.m} appear in \texttt{p}.
 
 <<test all>>=
-all(!dimnames(p.m@matches[p.m@matches[,1] != 0,])[[1]] %in% p@weights$id)
+all(!p.m@matches[,1] %in% p@weights$id)
 @ 
 
 Having created a matching portfolio using country, sector, and

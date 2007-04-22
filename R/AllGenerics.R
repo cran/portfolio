@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: AllGenerics.R 366 2006-10-03 15:04:46Z enos $
+## $Id: AllGenerics.R 387 2007-01-10 04:14:02Z enos $
 ##
 ## All generic functions for the portfolio class.
 ##
@@ -20,6 +20,9 @@ if(!isGeneric("exposure"))
 
 if(!isGeneric("performance"))
   setGeneric("performance", function(object, ...) standardGeneric("performance"))
+
+if(!isGeneric("totalReturn"))
+  setGeneric("totalReturn", function(object, ...) standardGeneric("totalReturn"))
 
 if(!isGeneric("portfolioDiff"))
   setGeneric("portfolioDiff", function(object, x, ...) standardGeneric("portfolioDiff"))
@@ -54,7 +57,7 @@ if(!isGeneric("updatePrices"))
   setGeneric("updatePrices", function(object, id, price, ...) standardGeneric("updatePrices"))
 
 if(!isGeneric("matching"))
-  setGeneric("matching", function(object, covariates, ...) standardGeneric("matching"))
+  setGeneric("matching", function(object, ...) standardGeneric("matching"))
 
 if(!isGeneric("getYahooData"))
   setGeneric("getYahooData", function(object, symbol.var, ...) standardGeneric("getYahooData"))
@@ -118,7 +121,7 @@ if(!isGeneric("trimSide"))
   setGeneric("trimSide", function(object, side, value, ...) standardGeneric("trimSide"))
 
 if(!isGeneric("dummyChunks"))
-  setGeneric("dummyChunks", function(object, side, total.usd, quality, ...) standardGeneric("dummyChunks"))
+  setGeneric("dummyChunks", function(object, side, num, quality, ...) standardGeneric("dummyChunks"))
 
 if(!isGeneric("securityInfo"))
   setGeneric("securityInfo", function(object, id, ...) standardGeneric("securityInfo"))

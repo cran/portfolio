@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.calcShares.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolio.calcShares.test.R 411 2007-04-22 19:29:16Z enos $
 ##
 ## Tests "calcShares" method of "portfolio"
 ##
@@ -23,7 +23,9 @@ p.0 <- new("portfolio", id.var = "id", symbol.var = "symbol.var",
 
 ## tests output against precalculated values
 
-stopifnot(all.equal(truth, calcShares(p.0)@shares$shares))
+shares <- calcShares(p.0)@shares
+shares <- shares[order(as.numeric(shares$id)),]
+stopifnot(all.equal(truth, shares$shares))
 
 ## Invalid Input: "price.var" not in names(data)
 

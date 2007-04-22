@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolioBasic.performance.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolioBasic.performance.test.R 411 2007-04-22 19:29:16Z enos $
 ##
 ## Tests for performance calculation on the portfolioBasic class.
 ##
@@ -10,8 +10,8 @@ library(portfolio)
 
 load("portfolioBasic.performance.test.RData")
 
-## save(perf.1, perf.2, perf.3, file = "portfolioBasic.performance.test.RData",
-##      compress = TRUE)
+## save(perf.1, perf.2, perf.3, file = "portfolioBasic.performance.test.RData", compress = TRUE)
+
 
 data <- data.frame(id = 1:20, in.var = 1:20)
 data$in.var <- as.numeric(data$in.var)

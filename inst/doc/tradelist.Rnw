@@ -1226,12 +1226,13 @@ the portfolio.
 
 \subsection{Accounting for turnover}
 
-\emph{Please note that this and subsequent sections need to account
+\emph{Note: this and subsequent sections need to account
   for change in turnover application.  Now all swaps are done such
   that the total market value of trades goes up to but doesn't exceed
   the turnover amount.  In the meantime I have adjusted the example's
   turnover to \$2,000 so that at least one chunk is done, although now
   Sweave chunks will be inconsistent with the text.}
+\\
 
 As we stated earlier, holding period would be endogenous if
 we could always set it to maximise risk-adjusted return.  However,

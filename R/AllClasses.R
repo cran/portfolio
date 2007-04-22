@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: AllClasses.R 366 2006-10-03 15:04:46Z enos $
+## $Id: AllClasses.R 411 2007-04-22 19:29:16Z enos $
 ##
 ## Class definitions for the portfolio package.
 ##
@@ -70,7 +70,7 @@ setClass("portfolioBasic",
          prototype = prototype(
            name          = "Unnamed portfolio",
            instant       = NULL,
-           data          = data.frame(),
+           data          = data.frame(id = I(character(0))),
 
            id.var        = "id",
            symbol.var    = character(0),
@@ -87,6 +87,11 @@ setClass("portfolioBasic",
            ),
 
          validity = function(object){
+
+           if(length(object@id.var) != 1){
+             return("id.var slot must be of length 1.")
+           }
+           
            if(!all(c("id","weight") %in% names(object@weights))){
              return(paste("Data frame in slot 'weights' must contain",
                           "columns 'id' and 'weight'"))
@@ -102,6 +107,9 @@ setClass("portfolioBasic",
            }
            if(any(duplicated(data$id))){
              return("Cannot have duplicate id's in the data slot")
+           }
+           if(any(duplicated(object@weights$id))){
+             return("Cannot have duplicate id's in the weights slot")
            }
 
            ## Check for illegal column names in the data slot
@@ -122,15 +130,14 @@ setClass("portfolioBasic",
            ## update the entire data slot without being terribly
            ## careful about the securities in it.
 
-           ## All securities in the weights slot must appear in the
-           ## data reference.
+           ## As a compromise, warn for now.
 
-#           if(!all(w$id %in% object@data$id)){
-#             id.viol <- w$id[which(!w$id %in% object@data$id)]
+           if(!all(w$id %in% object@data$id)){
+             id.viol <- w$id[which(!w$id %in% object@data$id)]
              
-#             return(paste("The securities with the following id's have",
-#                          "weights but no data in the data slot:", id.viol))
-#           }
+             warning(paste("The securities with the following id's have",
+                           "weights but no data in the data slot:", id.viol))
+           }
            
            return(TRUE)
          }
@@ -141,15 +148,17 @@ setClass("portfolioBasic",
 
 setClass("portfolio",
          representation(
-                        equity    = "numeric",
-                        file      = "character",
-                        price.var = "character",
-                        shares    = "data.frame"
+                        equity       = "numeric",
+                        weight.style = "character",
+                        file         = "character",
+                        price.var    = "character",
+                        shares       = "data.frame"
                         ),
          prototype = prototype(
-           equity    = numeric(),
-           file      = "none",
-           price.var = "price.usd",
+           equity       = numeric(0),
+           weight.style = "sides.separate",
+           file         = "none",
+           price.var    = "price.usd",
            
            shares = data.frame(id = I(character(0)), shares = numeric(0))
            ),
@@ -169,6 +178,23 @@ setClass("portfolio",
            if(!is.numeric(object@shares$shares)){
              return("Invalid class for shares column in shares slot: must be numeric")
            }
+           if(any(duplicated(object@shares$id))){
+             return("Cannot have duplicate id's in the weights slot")
+           }
+
+           ## Some controls on weight.style and equity:
+
+           if(length(object@weight.style) != 1){
+             return("Slot weight.style must have length 1")
+           }
+           if(!object@weight.style %in% c("sides.separate", "long.tmv",
+                                          "short.tmv", "reference.equity")){
+             return("Invalid value in weight.style slot.  Please see class?portfolio.")
+           }
+           if(object@weight.style %in% "reference.equity" &&
+              length(object@equity) != 1){
+             return("equity slot must have length 1 for weight.type 'reference.equity'")
+           }
 
            ## NA shares are not allowed.
 
@@ -184,7 +210,7 @@ setClass("portfolio",
            }
            
            ## Valid portfolio objects must have the same set of
-           ## identifiers in the shares data frame.
+           ## identifiers in the shares and weights data.frame's.
 
            w <- object@weights
            w <- w[order(w$id),]
@@ -376,6 +402,12 @@ setClass("tradelist",
                         ## portfolio, necessary for creating the
                         ## tradelist.
 
+                        ## Why not allow a different target equity for
+                        ## the long and short sides?  I believe the
+                        ## correct answer is to provide for a long and
+                        ## short reference equity in the portfolio
+                        ## class.
+                        
                         target.equity  = "numeric",
                         mv.long.orig   = "numeric",
                         mv.short.orig  = "numeric",
@@ -463,71 +495,89 @@ setClass("tradelist",
                return("\"data\" requires a \"volume\" column.\n")
              }
            }
-
-
            TRUE
          }
 
          )
 
+## Should matchedPortfolio extend portfolioBasic?
 
+setClassUnion("formulaOrNull", c("formula", "NULL"))
 setClass("matchedPortfolio",
 
-         representation(
-                        formula  = "formula",
+         representation(formula  = "formulaOrNull",
+                        method   = "character",
                         original = "portfolioBasic",
+                        omitted.treatment  = "numeric",
+                        omitted.control  = "numeric",
                         matches  = "matrix"
                         ),
                         
-         prototype(
-                   formula  = NULL,
-                   original = new("portfolioBasic"),
-                   matches  = matrix()
-                   ),
+         prototype = prototype(
+           formula  = NULL,
+           method   = "random",
+           original = new("portfolioBasic"),
+           omitted.treatment = 0,
+           omitted.control = 0,
+           matches  = matrix()
+           ),
          
          validity = function(object){
            
-           covariates <- all.vars(getCovariateFormula(object@formula))
-           
-           ## the object is empty if the formula is null
+           ## The object is empty if the formula is null
 
-           if(!is.null(formula)){
-             
-             ## all terms of the formula must have columns in the
+           if(!is.null(object@formula)){
+
+             covariates <- all.vars(getCovariateFormula(object@formula))
+           
+             ## All terms of the formula must have columns in the
              ## 'data' slot of 'original'
 
              if(!isTRUE(all(covariates %in%
                             names(object@original@data)))){
 
-               return("'data' slot in 'original' does not contain columns
-                      for all variables in the formula.")
+               return(paste("'data' slot in 'original' does not contain columns",
+                            "for all variables in the formula."))
 
              }
              
-             ## return information required
+             ## Make sure ret.var points to something.
 
              if(!isTRUE(object@original@ret.var %in%
                         names(object@original@data))){
                
-               return("'data' slot in 'original' does not contain a column for
-                      the 'ret.var'")
+               return(paste("'data' slot in 'original' does not contain a column for",
+                            "the 'ret.var'"))
 
              }
 
            }
 
-           ## matches and the universe should have the same number of stocks
+           ## Matches and the original portfolio should have the same number of stocks.
 
-           if(!isTRUE(all.equal(nrow(object@original@data),
+           if(!isTRUE(all.equal(nrow(object@original@weights),
                                 dim(object@matches)[1]))){
              
-             return("Number of stocks in universe differs between 'original'
-                     and 'matches'")
+             return(paste("Number of stocks in portfolio differs between 'original'",
+                          "and 'matches'"))
 
            }
 
            return(TRUE)
 
          }
+         )
 
+setClass("matchedPortfolioCollection",
+         representation(data = "list"),
+         prototype = prototype(
+           data = list()
+           ),
+
+         validity = function(object){
+           if(!all(sapply(object@data, class) == "matchedPortfolio")){
+             return("All elements must be of class 'matchedPortfolio'")
+           }
+           return(TRUE)
+         }
          )

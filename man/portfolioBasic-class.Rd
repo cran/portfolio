@@ -8,7 +8,7 @@
 \alias{contribution,portfolioBasic,character-method}
 \alias{create,portfolioBasic-method}
 \alias{exposure,portfolioBasic,character-method}
-\alias{matching,portfolioBasic,character-method}
+\alias{matching,portfolioBasic-method}
 \alias{performance,portfolioBasic-method}
 \alias{plot,portfolioBasic,missing-method}
 \alias{portfolioDiff,portfolioBasic,portfolioBasic-method}

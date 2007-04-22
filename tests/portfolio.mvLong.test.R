@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.mvLong.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolio.mvLong.test.R 410 2007-04-22 00:13:06Z enos $
 ##
 ## Tests for method "mvLong".
 ##
@@ -18,9 +18,9 @@ data.0 <- data.frame(id = 1:20, symbol.var = letters[1:20],
 ## corner case of 0 positions
 
 p <- new("portfolio", id.var = "id", symbol.var = "symbol.var",
-               in.var = "in.var", ret.var = "ret.var", type = "equal",
-               size = "quintile", equity = 100000, sides = "long",
-               price.var = "price.var", data = data.0)
+         in.var = "in.var", ret.var = "ret.var", type = "equal",
+         size = "quintile", equity = 100000, sides = "long",
+         price.var = "price.var", data = data.0)
 
 p@shares <- p@shares[0,]
 

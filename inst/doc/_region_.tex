@@ -1,0 +1,16 @@
+\message{ !name(matching_portfolio.Rnw.tex)}{\makeatletter\gdef\AucTeX@cite#1[#2]#3{[#3#1#2]}\gdef\cite{\@ifnextchar[{\AucTeX@cite{, }}{\AucTeX@cite{}[]}}}
+
+\message{ !name(matching_portfolio.Rnw) !offset(145) }
+p <- new("portfolioBasic",
+         name    = "AFL Portfolio",
+         instant = as.Date("2004-12-31"),
+         data    = assay,
+         id.var  = "symbol",
+         in.var  = "assay.wt",
+         type    = "relative",
+         size    = "all",
+         ret.var = "ret.0.3.m")
+summary(p)
+summary(performance(p))
+
+\message{ !name(matching_portfolio.Rnw.tex) !offset(-16) }

@@ -17,6 +17,7 @@
 \alias{performance,portfolio-method}
 \alias{portfolioDiff,portfolio,portfolio-method}
 \alias{updatePrices,portfolio,character,numeric-method}
+\alias{summary,portfolio-method}
 
 \alias{calcShares}
 \alias{calcWeights}
@@ -66,7 +67,25 @@ Objects can be created by calls of the form \code{new("portfolio", ...)}.
       vector in calls to \code{create}. }
     \item{\code{weight.var}:}{Object of class \code{"character"}
     containing the name of the column in the "data" slot to be used as
-      weight overrides in calls to \code{create}.}
+    weight overrides in calls to \code{create}.}
+    \item{\code{weight.style}:}{Object of class \code{"character"}
+    specifying how to calculate weights in this portfolio.  Valid
+    entries are:
+    \begin{itemize}
+    \item \code{"sides.separate"}: The default.  Calculate weight of a
+    position with respect to the total market value of positions on the
+    same side.
+    \item \code{"long.tmv"}: Calculate weight of a
+    position with respect to the total market value of long positions.
+    \item \code{"short.tmv"}: Calculate weight of a
+    position with respect to the (positive) total market value of short
+    positions.
+    \item \code{"reference.equity"}: Calculate weight of a position
+    relative to the reference equity in the \code{equity} slot.  The
+    \code{equity} slot must contain a numeric vector of length 1 for
+    this style.
+    \end{itemize}
+    }
     \item{\code{ret.var}:}{Object of class \code{"character"} containing
     the name of the column in the "data" slot to be used as the return
     in calls to \code{performance}.}
@@ -122,5 +141,5 @@ Class \code{"portfolioBasic"}, directly.
 	"character", price = "numeric")}: ... }
   }
 }
-\author{ Jeff Enos \email{jeff@kanecap.com}}
+\author{Jeff Enos \email{jeff@kanecap.com}}
 \keyword{classes}

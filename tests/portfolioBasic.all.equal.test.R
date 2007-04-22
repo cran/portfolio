@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolioBasic.all.equal.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolioBasic.all.equal.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests "all.equal" method of "portfolioBasic"
 ##

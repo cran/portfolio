@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: weight.R 366 2006-10-03 15:04:46Z enos $
+## $Id: weight.R 386 2007-01-10 04:12:20Z enos $
 ##
 ## Form weights from a data.frame and an in.var.
 ##
@@ -61,7 +61,7 @@ weight <- function(x, in.var, type, size, sides, weight.var = NULL, verbose = FA
 
     ## Is size too small?
 
-    if(size < 1){
+    if(type != "relative" && size < 1){
       stop("Size is < 1 per side.  Increase size parameter or number non-na in.var values.")
     }
     

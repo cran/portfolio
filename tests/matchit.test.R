@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: matchit.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: matchit.test.R 389 2007-01-10 04:28:44Z enos $
 ##
 ## Tests for the matching method of portfolioBasic
 ##
@@ -8,7 +8,7 @@
 
 library(portfolio)
 
-## save(truth, truth.2, truth.3, file = "matchit.test.RData", compress = TRUE)
+## save(truth, truth.2, truth.3, truth.4, file = "matchit.test.RData", compress = TRUE)
 
 load("matchit.test.RData")
 
@@ -22,17 +22,17 @@ x <- assay[assay$country == "USA", c("symbol", "name", "sector", "liquidity", "o
 ## other US stocks
 
 all.stocks <- c("76143", "18027", "14730", "6961", "6930", "69571", "71262",
-"21266", "7308", "11746", "27043", "37495", "74206", "79463", "2923", "8267",
-"33105", "26322", "68150", "71570", "22101", "19167", "39252", "13776",
-"83265", "71301", "7631", "29780", "3604", "28225")
+                "21266", "7308", "11746", "27043", "37495", "74206", "79463", "2923", "8267",
+                "33105", "26322", "68150", "71570", "22101", "19167", "39252", "13776",
+                "83265", "71301", "7631", "29780", "3604", "28225")
 
 x <- x[all.stocks,]
 
 for(i in names(x)){
-    if(identical(class(x[[i]]), "factor")){
-      x[[i]] <- as.character(x[[i]])
-    }
+  if(is.factor(x[[i]])){
+    x[[i]] <- as.character(x[[i]])
   }
+}
 
 ## done preparing data, tests greedy algorithm of entire "matchit"
 ## function.
@@ -46,54 +46,46 @@ stopifnot(
           all(mapply(all.equal, test, truth))
           )
 
-## Adds missing data
-
-y <- x
-
-y[c(1, nrow(y)), "liquidity"] <- NA
-
-test.2 <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = y)
-
-stopifnot(
-          all.equal(dimnames(test.2)[1], dimnames(truth.2)[1]),
-          all(mapply(all.equal, test.2, truth.2))
-          )
-
 ## corner case: number of controls is less than the number of treated.
 
-y.sub <- y[1:15,]
+x.sub <- x[2:15,]
 
-test.3 <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = y.sub)
+test.3 <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = x.sub)
 
 stopifnot(
           all.equal(dimnames(test.3)[1], dimnames(truth.3)[1]),
           all.equal(test.3[1,], truth.3[1,])
           )
 
-## corner case: number of controls is 0
 
-y.sub <- y[1:10,]
+################################################################################
+## Exact
+################################################################################
 
-test <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = y.sub)
+test <- portfolio:::.matchit(on.fl ~ sector, data = x, method = "greedy", exact = "sector")
+test <- test[sort(row.names(test)), , drop = FALSE]
 
-stopifnot(
-          all(is.na(test[1,]))
+stopifnot(all.equal(test, truth.4),
+          all.equal(table(x$sector[x$on.fl]), table(x[test,"sector"]))
           )
 
 ################################################################################
-## Sample Matching
+## Random matching, with exact
 ################################################################################
 
-## corner case: number of controls is 0
+set.seed(1)
 
-y.sub <- y[1:10,]
+x$foo.1 <- c("a","a","b")
+x$foo.2 <- c("a","b")
 
-test <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = y.sub,
-                             method = "sample", n.matches = 10)
+test <- portfolio:::.matchit(treat.var = "on.fl",  data = x, method = "random", n.matches = 10, exact = c("foo.1","foo.2"))
 
-stopifnot(
-          all(is.na(test[1,]))
-          )
+x.treat <- x[x$on.fl,]
+for(i in 1:ncol(test)){
+  x.matched <- x[test[,1],]
+  stopifnot(all.equal(table(x.treat$foo.1, x.treat$foo.2),
+                      table(x.matched$foo.1, x.matched$foo.2)))
+}
 
 ################################################################################
 ## Matchit subfunctions
@@ -101,22 +93,8 @@ stopifnot(
 
 ## tests that .valid.data converts character vectors to factors
 
-x <- portfolio:::.valid.data(treat.var = "on.fl", c("sector", "country"), x)
+x <- portfolio:::.data.prep(treat.var = "on.fl", c("sector", "country"), x)
 
-stopifnot(
-          identical(class(assay$sector), "factor"),
-          identical(class(assay$country), "factor")
-          )
+stopifnot(is.factor(assay$sector),
+          is.factor(assay$country))
 
-## tests .remove.nas
-
-x <- assay
-
-x[c(1,10,100), "sector"] <- NA
-
-x <- portfolio:::.remove.nas(data = x, treat.var = "on.fl", c("sector", "country"),
-                             verbose = TRUE)
-
-stopifnot(
-          nrow(x) < nrow(assay)
-          )

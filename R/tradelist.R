@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.R 379 2006-10-30 16:50:02Z enos $
+## $Id: tradelist.R 403 2007-04-19 16:27:11Z enos $
 ##
 ## First pass at a trading system that enables daily trading
 ## at a given turnover rate.
@@ -819,6 +819,15 @@ setMethod("calcChunks",
                                          chunks$trading.volume,
                                          chunks$chunk)
             }
+            else if("volume.10.pct.only" %in% object@tca){
+              chunks$tca.rank <- mapply(.tca.volume.10.pct.only,
+                                         chunks$tca.rank,
+                                         chunks$chunk.shares,
+                                         chunks$cumsum.chunk.shares,
+                                         chunks$side,
+                                         chunks$trading.volume,
+                                         chunks$chunk)
+            }
             if("entry" %in% object@tca){
               chunks$tca.rank <- mapply(.tca.entry,
                                          chunks$tca.rank,
@@ -921,29 +930,41 @@ setMethod("calcSwaps",
 
               ## Long side: over  = create sells
               ##            under = create buys
-              
+
               if(to.equity.long > 0){
-                dummy.sells <- dummyChunks(object,
-                                           "S", to.equity.long, "good")
+                num.dummy <-
+                  sum(cumsum(buys$chunk.mv[order(buys$tca.rank,
+                                                 decreasing = TRUE)])
+                      < to.equity.long)
+                dummy.sells <- dummyChunks(object, "S", num.dummy, "good")
                 sells <- rbind(sells, dummy.sells)
               }
               else if(to.equity.long < 0){
-                dummy.buys  <- dummyChunks(object,
-                                           "B", to.equity.long, "good")
+                num.dummy <-
+                  sum(cumsum(sells$chunk.mv[order(sells$tca.rank,
+                                                  decreasing = FALSE)])
+                      > to.equity.long)
+                dummy.buys  <- dummyChunks(object, "B", num.dummy, "good")
                 buys <- rbind(buys, dummy.buys)
               }
 
-              ## Long side: over  = create shorts
-              ##            under = create covers
+              ## Short side: over  = create shorts
+              ##             under = create covers
 
               if(to.equity.short > 0){
-                dummy.shorts <- dummyChunks(object,
-                                            "X", to.equity.short, "good")
+                num.dummy <-
+                  sum(cumsum(covers$chunk.mv[order(covers$tca.rank,
+                                                   decreasing = TRUE)])
+                      < to.equity.short)
+                dummy.shorts <- dummyChunks(object, "X", num.dummy, "good")
                 shorts <- rbind(shorts, dummy.shorts)
               }
               else if(to.equity.short < 0){
-                dummy.covers <- dummyChunks(object,
-                                            "C", to.equity.short, "good")
+                num.dummy <-
+                  sum(cumsum(shorts$chunk.mv[order(shorts$tca.rank,
+                                                   decreasing = FALSE)])
+                      > to.equity.short)
+                dummy.covers <- dummyChunks(object, "C", num.dummy, "good")
                 covers <- rbind(covers, dummy.covers)
               }
             }
@@ -956,27 +977,23 @@ setMethod("calcSwaps",
             if(nrow(buys) > nrow(sells))
               sells <-   rbind(sells,
                                dummyChunks(object, "S",
-                                            object@chunk.usd *
                                             nrow(buys) - nrow(sells),
                                             "bad"))
             
             if(nrow(buys) < nrow(sells))
               buys <-   rbind(buys,
                               dummyChunks(object, "B",
-                                           object@chunk.usd *
                                            nrow(sells) - nrow(buys),
                                            "bad"))
             if(nrow(covers) > nrow(shorts))
               shorts <- rbind(shorts,
                               dummyChunks(object, "X",
-                                           object@chunk.usd *
                                            nrow(covers) - nrow(shorts),
                                            "bad"))
 
             if(nrow(covers) < nrow(shorts))
               covers <- rbind(covers,
                               dummyChunks(object, "C",
-                                           object@chunk.usd *
                                            nrow(shorts) - nrow(covers),
                                            "bad"))
 
@@ -1633,19 +1650,14 @@ setMethod("show",
           }
           )
 
-## Create a data frame of dummy chunks for a given side and dollar
-## amount (total.usd).  The supplied dollar amount, together with
-## the tradelist object's chunk size, determines the number of rows
-## in the resulting data frame.
-
-## total.usd should be replaced by the variable that we're using as a
-## measure of price (perhaps "total.var")
+## Create a data frame of dummy chunks for a given side and number.
 
 setMethod("dummyChunks",
           "tradelist",
-          function(object, side, total.usd, quality){
-
-            stopifnot(quality %in% c("good","bad"))
+          function(object, side, num, quality){
+            
+            stopifnot(quality %in% c("good","bad"),
+                      num >= 0)
             
             dummy.chunk <- data.frame(id = 0)
             dummy.chunk[chunksCols(object)] <- NA
@@ -1682,13 +1694,11 @@ setMethod("dummyChunks",
             ## column.
 
             dummy.chunk$dummy.quality <- quality
-            
-            num.needed <- round(abs(total.usd) / abs(object@chunk.usd))
 
             ## Create the correct number of dummy chunks by repeated
             ## indexing.
             
-            dummy.chunk[rep(1, num.needed),]
+            dummy.chunk[rep(1, num),]
           }
           )
 
@@ -1802,6 +1812,33 @@ setMethod("dummyChunks",
 
   adjustment <- 0
   if((0 <= vol.avg.pct && vol.avg.pct < 0.15) || chunk == 1){
+    adjustment <- 0
+  }
+  else{
+    adjustment <- 50000
+  }
+
+  if(side %in% c("C","B")){
+    adjustment <- -1 * adjustment
+  }else if(side %in% c("X","S")){
+    adjustment <- adjustment
+  }
+  else{
+    stop(paste("Invalid side: ", side, sep = ""))
+  }
+
+  alpha + adjustment
+}
+
+## Another for only the first 10%.  Refactoring here would be nice.
+
+.tca.volume.10.pct.only <- function(alpha, shares, cumsum.shares, side, volume, chunk){
+
+  vol.avg.pct <- mean(c((cumsum.shares - shares) / volume,
+                        cumsum.shares            / volume))
+
+  adjustment <- 0
+  if((0 <= vol.avg.pct && vol.avg.pct < 0.10) || chunk == 1){
     adjustment <- 0
   }
   else{

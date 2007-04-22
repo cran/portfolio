@@ -17,6 +17,7 @@ exportClasses(
               "tradelist",
               "trades",
               "matchedPortfolio",
+              "matchedPortfolioCollection",
               
               "portfolioBasicOrNull",
               "portfolioOrNull"

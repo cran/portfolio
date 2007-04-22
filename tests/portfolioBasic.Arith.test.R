@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolioBasic.Arith.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolioBasic.Arith.test.R 406 2007-04-19 16:30:22Z enos $
 ##
 ## Tests "+" method of "portfolioBasic"
 ##
@@ -37,3 +37,14 @@ stopifnot(
           isTRUE(all.equal(p.sum, truth)),
           nrow(p.sum@data) == length(union(p.0@data$id, p.1@data$id))
           )
+
+
+p.pos <- p.0
+
+p.neg <- p.0
+p.neg@weights$weight <- -1 * p.neg@weights$weight
+
+p.sum <- p.pos + p.neg
+
+stopifnot(validObject(p.sum, test = TRUE),
+          nrow(p.sum@weights) == 0)

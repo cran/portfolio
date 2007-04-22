@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolioBasic.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolioBasic.R 411 2007-04-22 19:29:16Z enos $
 ##
 ## Basic portfolio class.
 ##
@@ -62,7 +62,7 @@ setMethod("create",
                                      object@weight.var)
 
             input <- input[!is.na(input$weight), c("id", "weight")]
-            
+
             ## Apply min/max weights from the weight.range slot.
 
             min.weight <- object@weight.range[1]
@@ -77,7 +77,7 @@ setMethod("create",
             }
 
             object@weights <- input
-
+            object@weights$id <- as.character(object@weights$id)
             
             ## I don't know why we were always calling show here.
             ## show(object)
@@ -96,6 +96,8 @@ setMethod("scaleWeights",
           "portfolioBasic",
           function(object, target = c(1,-1), condition){
 
+            validObject(object)
+            
             if(length(target) != 2){
               stop("Must supply both long and short weight sums")
             }
@@ -153,6 +155,8 @@ setMethod("balance",
             }
             stopifnot(in.var %in% names(object@data))
 
+            validObject(object)
+            
             ## Hack right now for numeric in.vars: destructively
             ## modify the data slot by adding a new variable with the
             ## levels of in.var.
@@ -218,47 +222,14 @@ setMethod("summary",
           function(object){
 
             weight.col <- ifelse(nrow(object@weights) > 200, "bps", "pct")
+            x <- .summary.prep.df(object, weight.col)
             
             columns  <- c("id", weight.col)
             disp.num <- 5
-
-            ## Don't go around merging and reporting if there aren't
-            ## any weights.
-
-            if(nrow(object@weights) == 0){
-              cat("Empty portfolio\n")
-              return()
-            }
-
-            x <- merge(object@weights, object@data, by = "id", all.x = TRUE)
-            
-            ## Create the weight.col column to be something useful to
-            ## the user, based on the number of positions in this
-            ## portfolio.
-
-            x[[weight.col]] <- x$weight * ifelse(weight.col == "bps",
-                                                 100 * 100,
-                                                 100)
-
-            ## Try to set row.names to something useful if symbol.var
-            ## is present.
-
-            if(length(object@symbol.var > 1) &&
-               object@symbol.var %in% names(x)){
-              rn <- ifelse(is.na(x[[object@symbol.var]]), x$id, as.character(x[[object@symbol.var]]))
-              if(length(unique(rn)) == length(rn)){
-                row.names(x) <- rn
-              }
-            }
             
             long  <- subset(x, weight > 0)
             short <- subset(x, weight < 0)
 
-            ## Print basic information about the portfolio in a nice
-            ## fashion.  This is my first pass at fixed-width
-            ## formatting in R, and involves using the C-style
-            ## sprintf.
-            
             cat("Portfolio: ", object@name, "\n\n",
                 sprintf("       %6s %12s", "count", "weight"), "\n",
 
@@ -299,6 +270,51 @@ setMethod("summary",
           }
           )
 
+## Summary helper function that returns the data frame from which
+## summary information is displayed.  Abstracted in this way because
+## of the similarity between the summary methods for 'portfolioBasic'
+## and 'portfolio', but the right answer here is that these methods
+## should return summary _object_ that can be saved and re-displayed.
+##
+## The resulting data.frame will have all columns in the data slot.
+
+.summary.prep.df <- function(object, weight.col){
+
+  stopifnot(is(object, "portfolioBasic") ||
+            is(object, "portfolio"))
+
+  ## Don't go around merging and reporting if there aren't
+  ## any weights.
+
+  if(nrow(object@weights) == 0){
+    cat("Empty portfolio\n")
+    return()
+  }
+
+  x <- merge(object@weights, object@data, by = "id", all.x = TRUE)
+  
+  ## Create the weight.col column to be something useful to
+  ## the user, based on the number of positions in this
+  ## portfolio.
+
+  x[[weight.col]] <- x$weight * ifelse(weight.col == "bps",
+                                       100 * 100,
+                                       100)
+
+  ## Try to set row.names to something useful if symbol.var
+  ## is present.
+
+  if(length(object@symbol.var > 1) &&
+     object@symbol.var %in% names(x)){
+    rn <- ifelse(is.na(x[[object@symbol.var]]), x$id, as.character(x[[object@symbol.var]]))
+    if(length(unique(rn)) == length(rn)){
+      row.names(x) <- rn
+    }
+  }
+  
+  invisible(x)
+}
+
 ## Returns a list of data frames containing exposures to the factors
 ## specified in exp.var.  All numeric exposures are collected into the
 ## named list element 'numeric' and placed first in the list.
@@ -308,6 +324,8 @@ setMethod("exposure",
           signature(object = "portfolioBasic", exp.var = "character"),
           function(object, exp.var){
 
+            validObject(object)
+            
             ## Return NULL if there are no weights for this portfolio.
             
             if(nrow(object@weights) == 0) return(NULL)
@@ -440,6 +458,8 @@ setMethod("performance",
           signature(object = "portfolioBasic"),
           function(object){
 
+            validObject(object)
+            
             perf <- new("performance")
             
             x <- merge(object@weights, object@data, by = "id", all.x = TRUE)
@@ -455,6 +475,9 @@ setMethod("performance",
 
             perf@ret        <- sum(x$contrib,     na.rm = TRUE)
             perf@ret.detail <- x[c("id", "weight", "ret", "contrib")]
+
+            perf@missing.price   <- as.numeric(NA)
+            perf@missing.return  <- sum(is.na(x$ret))
 
             if(length(object@symbol.var) > 0 &&
                object@symbol.var %in% names(object@data)){
@@ -492,6 +515,8 @@ setMethod("contribution",
           signature(object = "portfolioBasic", contrib.var = "character"),
           function(object, contrib.var, buckets = 5){
 
+            validObject(object)
+            
             x <- object@data
 
             stopifnot(all(contrib.var %in% names(x)))
@@ -671,60 +696,152 @@ setMethod("plot",
           )
 
 setMethod("matching",
-
-          signature(object     = "portfolioBasic",
-                    covariates = "character"
-                    ),
-
-          function(object, covariates, method = "greedy", n.matches = 1){
+          signature(object    = "portfolioBasic"),
+          function(object,
+                   universe   = NULL,
+                   covariates = NULL,
+                   method     = "greedy",
+                   n.matches  = 1,
+                   exact      = character()){
 
             if(nrow(object@weights) == 0){
               stop("Cannot calling matching on a portfolio with no positions")
             }
 
-            ## determines which stocks are in the original portfolio
-            ## and buidl the formula from this information
+            ## Construct formula based on supplied parameters.
+
+            f <- NULL
+            treat.var <- "treatment"
+            if(!is.null(covariates)){
+              f <- formula(paste("treatment ~", paste(covariates, collapse = "+")))
+              treat.var <- NULL
+            }
+
+            ## At this point, all securities in the original portfolio
+            ## should be in its data slot.  This is a good sanity
+            ## check, because we're about to restrict what's allowed
+            ## in the original portfolio (treatment) and data slot
+            ## (treatment + controls).
             
-            x <- .matching.prep(object@data, object@weights, covariates)
-            f <- formula(paste("treatment ~", paste(covariates, collapse = "+")))
+            stopifnot(all(object@weights$id %in% object@data$id))
+
+            ## Originally I accidentally had names(data) here, before
+            ## that was a symbol in this environment.  But it didn't
+            ## cause an error because I could call 'names' on the
+            ## 'data' function, which would return NULL.  Hence
+            ## perhaps we should be more careful about variables named
+            ## like existing objects.
+
+            data <- object@data
+            data.cols.orig <- names(data)
+
+            data <- merge(object@data, object@weights, by = "id", all.x = TRUE)
+            data$treatment <- !is.na(data$weight)
+
+            omitted.treatment <- 0
+            omitted.control   <- 0
+
+            ## Remove stocks from the original portfolio that
+            ## have an NA weight.  We don't care how they got to be
+            ## NA, and they might still be good controls.
+
+            if(any(is.na(object@weights$weight))){
+              omitted.treatment <- omitted.treatment + sum(is.na(object@weights$weight))
+              object@weights <- subset(object@weights, is.na(weight))
+            }
+
+            ## Now all omissions go into data.nok.
+
+            data.nok <- data.frame()
+
+            ## Process the universe directive.  That directive will
+            ## also exclude stocks from being in the original
+            ## portfolio to match.
+            
+            ## Note that 'weight' is a column in the data frame upon
+            ## which we're applying the universe restriction.  Since
+            ## it's unambiguous, 'weight' may be used in the universe
+            ## parameter's condition.
+            
+            if(missing(universe) || is.null(universe)){
+              r <- TRUE
+            }
+            else{
+              stopifnot(is.character(universe))
+              e <- parse(text = universe)
+              r <- eval(e, data, parent.frame())
+              r <- r & !is.na(r)
+            }
+
+            if(any(data$treatment & !r)){
+              warning("Universe does not include all elements of the original portfolio")
+            }
+
+            data.nok <- rbind(data.nok, data[!r,])
+            data     <- data[r,]
+
+            for(i in c(object@ret.var, covariates, exact)){
+              data.nok <- rbind(data.nok, data[is.na(data[[i]]),])
+              data     <- subset(data, !id %in% data.nok$id)
+            }
+            
+            omitted.treatment <- omitted.treatment + sum(data.nok$treatment)
+            omitted.control   <- omitted.control + sum(!data.nok$treatment)
+
+            ## Update the original portfolio to reflect these
+            ## omissions.  We store this portfolio in the result
+            ## object, so it's handy to see which portfolio we're
+            ## _actually_ matching against.
+
+            object@data <- data[data.cols.orig]
+            object@weights <- subset(object@weights, !id %in% data.nok$id)
+            
+            validObject(object)
+            
+            cols <- c("id","treatment", covariates, exact)
 
             ## ".matchit" returns a matrix, "m".  The row names of "m"
             ## are the "id" values for "object".  The cell values are
             ## the "id" values for the matched portfolios.  Moving
             ## across rows, this is a mapping of original ids to
-            ## matched ids
+            ## matched ids.
 
-            row.names(x) <- x$id
-            id.map <- portfolio:::.matchit(f, data = x, method = method,
-                                           n.matches = n.matches)
+            row.names(data) <- data$id
 
-            new.weights <- .matching.scale.weights(object@weights, id.map)
+            id.map <- portfolio:::.matchit(f,
+                                           data      = data[cols],
+                                           treat.var = treat.var,
+                                           method    = method,
+                                           n.matches = n.matches,
+                                           exact     = exact)
 
-            matches <- .build.matches(object@data$id,
-                                      id.map,
-                                      new.weights$weight)
+            ## Use the set of non-na weights that were _passed to
+            ## .matchit_ to compute what matched weights should be.
 
-            invisible(new("matchedPortfolio", formula = f, original = object,
-                          matches = matches))
+            ## Probably can do away with new.weights 
+            
+            # new.weights <- .matching.scale.weights(data[!is.na(data$weight), c("id","weight")], id.map)
+
+            #matches <- .build.matches(object@data$id,
+            #                          id.map,
+            #                          new.weights$weight)
+
+
+            invisible(new("matchedPortfolio",
+                          formula  = f,
+                          method   = method,
+                          original = object,
+                          omitted.treatment  = omitted.treatment,
+                          omitted.control    = omitted.control,
+                          matches  = id.map))
 
 
           }
           )
 
-.matching.prep <- function(data, weights, covariates){
 
-  ## Subroutine of "matching" method.  "data" is a data frame
-  ## containing at a minimum, an "id" column and a column for every
-  ## element in "covariates".  "weights" is a data frame containing
-  ## two columns, "id" and "weight".  Returns a data frame with at
-  ## least 3 columns, "id", "treatment", and a column for every
-  ## element in "covariates".
-  
-  res           <- merge(data, weights, by = "id", all = TRUE)
-  res$treatment        <- !is.na(res$weight)
-
-  res[c("id", "treatment", covariates)]
-}
+## The matching code needs to be refactored, which means tidying up
+## these dot functions.
 
 .matching.scale.weights <- function(weights, id.map){
 
@@ -788,8 +905,6 @@ setMethod("matching",
   x * scaling.factors[index]
 }
 
-
-
 .build.matches <- function(universe, id.map, weights){
 
   ## "universe" is a vector of the unique identifiers for each stock
@@ -815,7 +930,7 @@ setMethod("matching",
 
     ## If there is more than one entry for the same stock in a
     ## single portfolio combine the weights for multiple entries
-    ## into a single weight
+    ## into a single weight.
 
     x <- tapply(weights, id.map[,i], sum)
 
@@ -866,6 +981,9 @@ setMethod("+",
           signature(e1 = "portfolioBasic", e2 = "portfolioBasic"),
           function(e1, e2){
 
+            validObject(e1)
+            validObject(e2)
+            
             ## We could spend a lot of time figuring out the correct
             ## value for each slot in the sum.  For now, though,
             ## arithmetic operators will return a portfolio object of
@@ -914,6 +1032,10 @@ setMethod("+",
               w$weight <- w$weight.e1 + w$weight.e2
               r@weights <- w[c("id","weight")]
 
+              ## Remove entries that now have zero weight.
+
+              r@weights <- subset(r@weights, is.na(weight) | weight != 0)
+              
               ## The data slot in the sum portfolio needs to include a
               ## row for each security in the set union of securities
               ## in the two argument portfolios' data slots.

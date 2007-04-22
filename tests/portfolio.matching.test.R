@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.matching.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolio.matching.test.R 389 2007-01-10 04:28:44Z enos $
 ##
 ## 
 ##
@@ -9,16 +9,14 @@
 library(portfolio)
 
 load("portfolio.matching.test.RData")
-## save(p, truth, file = "portfolio.matching.test.RData", compress = TRUE)
+## save(p, p.truth, file = "portfolio.matching.test.RData", compress = TRUE)
 
 p.m <- matching(p, covariates = c("country", "sector", "liquidity"))
-
-test <- p.m@matches[p.m@matches[,1] < 0,]
-test <- test[order(names(test))]
+p.test <- portfolio:::.match.as.portfolioBasic(p.m, 1)
 
 stopifnot(
           validObject(p.m),
-          all.equal(truth, test)
+          all.equal(p.test, p.truth)
           )
 
 ## basic test of "sample" method
@@ -28,21 +26,30 @@ p.m <- matching(p, covariates = c("sector", "liquidity"), method = "sample",
 
 
 stopifnot(
-          all.equal(dim(p.m@matches), c(4000, 5))
+          all.equal(dim(p.m@matches), c(33, 5))
           )
-          
+
+set.seed(1)
+
+p.m <- matching(p, method = "random", n.matches = 5)
+
+
+stopifnot(
+          all.equal(dim(p.m@matches), c(33, 5))
+          )
+
 ################################################################################
 ## Subroutine tests 
 ################################################################################
 
 ## .matching.prep
 
-test <- portfolio:::.matching.prep(data = p@data, weights = p@weights,
-                       covariates = c("sector", "liquidity"))
+#test <- portfolio:::.matching.prep(data = p@data, weights = p@weights,
+#                       covariates = c("sector", "liquidity"))
 
-stopifnot(
-          all(test[test$treatment, "id"] %in% p@weights$id)
-          )
+#stopifnot(
+#          all(test[test$treatment, "id"] %in% p@weights$id)
+#          )
 
 ## .matching.scaled.weights
 

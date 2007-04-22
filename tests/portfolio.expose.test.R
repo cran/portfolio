@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.expose.test.R 366 2006-10-03 15:04:46Z enos $
+## $Id: portfolio.expose.test.R 406 2007-04-19 16:30:22Z enos $
 ##
 ## Tests the expose method of class portfolio.
 ##
@@ -13,8 +13,10 @@ load("portfolio.expose.test.RData")
 ## save(test.portfolio, test.trades, empty.trades, bad.1, bad.2, bad.3, bad.4, truth, file = "portfolio.expose.test.RData", compress = TRUE)
 
 result.1 <- expose(test.portfolio, test.trades)
+result.1 <- calcWeights(result.1)
 
 result.2 <- expose(test.portfolio, empty.trades)
+result.2 <- calcWeights(result.2)
 
 stopifnot(
           all.equal(result.1, truth),

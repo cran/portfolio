@@ -1,7 +1,7 @@
 
 ################################################################################
 ##
-## $Id: df.category.mean.R 366 2006-10-03 15:04:46Z enos $
+## $Id: df.category.mean.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Take element-wise means of numeric data in a list of data frames.
 ## Currently, this function will return a data frame containing one
