@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.R 403 2007-04-19 16:27:11Z enos $
+## $Id: tradelist.R 1131 2007-08-09 20:38:05Z enos $
 ##
 ## First pass at a trading system that enables daily trading
 ## at a given turnover rate.
@@ -843,6 +843,7 @@ setMethod("calcChunks",
                                          object@mv.long.orig)
             }
 
+            
             ## Row names for chunk are symbol + chunk number.  Chunk
             ## number 2 for IBM would be "IBM.2".
             
@@ -887,8 +888,16 @@ setMethod("calcSwaps",
 
             chunks <- object@chunks
             chunks$dummy.quality <- NA
+
+            ## At this point, remove all chunks that have an NA
+            ## tca.rank.  By this mechanism we can categorically
+            ## exclude some chunks in our tca functions.
+
+            chunks <- subset(chunks, !is.na(tca.rank))
+
+            ## Split up chunks by side.
             
-            split.chunks <- split(chunks, object@chunks$side)
+            split.chunks <- split(chunks, chunks$side)
 
             ## If any one of the types of trades are missing, set the
             ## data fame for that type (buy, sell, etc..) to have 0
@@ -1842,7 +1851,11 @@ setMethod("dummyChunks",
     adjustment <- 0
   }
   else{
-    adjustment <- 50000
+
+    ## The below will cause the tca.rank of all chunks above 10pct
+    ## dvol to be excluded from tradelist analysis.
+    
+    adjustment <- NA
   }
 
   if(side %in% c("C","B")){

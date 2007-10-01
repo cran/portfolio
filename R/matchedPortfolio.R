@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: matchedPortfolio.R 404 2007-04-19 16:27:55Z enos $
+## $Id: matchedPortfolio.R 1128 2007-08-09 18:16:56Z enos $
 ##
 ## Basic matchedPortfolio class.
 ##

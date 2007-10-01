@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.performance.test.R 384 2007-01-09 03:27:22Z enos $
+## $Id: portfolio.performance.test.R 1128 2007-08-09 18:16:56Z enos $
 ##
 ## Tests the performance method of class portfolio.
 ##

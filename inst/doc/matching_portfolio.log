@@ -1,9 +1,10 @@
-This is pdfTeXk, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2005.1.19)  22 APR 2007 19:25
+This is pdfTeXk, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2005.1.19)  2 OCT 2007 08:56
  file:line:error style messages enabled.
-**\nonstopmode \input /home/enos/work/portfolio/trunk/portfolio/inst/doc/matchi
-ng_portfolio.tex
-(/home/enos/work/portfolio/trunk/portfolio/inst/doc/matching_portfolio.tex
-(/usr/share/texmf/tex/latex/base/article.cls
+**\nonstopmode \input /home/enos/work/portfolio/branches/portfolio_0.4-patched/
+portfolio/inst/doc/matching_portfolio.tex
+
+(/home/enos/work/portfolio/branches/portfolio_0.4-patched/portfolio/inst/doc/ma
+tching_portfolio.tex (/usr/share/texmf/tex/latex/base/article.cls
 Document Class: article 2001/04/21 v1.4e Standard LaTeX document class
 (/usr/share/texmf/tex/latex/base/size10.clo
 File: size10.clo 2001/04/21 v1.4e Standard LaTeX file (size option)
@@ -181,12 +182,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 362--363
 [6] [7] [8] (./matching_portfolio.bbl) [9] (./matching_portfolio.aux) ) 
 Here is how much of TeX's memory you used:
  2304 strings out of 95437
- 30189 string characters out of 1188125
+ 30264 string characters out of 1188125
  73837 words of memory out of 1000001
  5274 multiletter control sequences out of 10000+50000
  35909 words of font info for 73 fonts, out of 500000 for 1000
  14 hyphenation exceptions out of 1000
- 35i,8n,23p,321b,358s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 35i,8n,23p,346b,358s stack positions out of 1500i,500n,5000p,200000b,5000s
  69 PDF objects out of 300000
  0 named destinations out of 131072
  0 words of extra memory for PDF output out of 65536
@@ -203,4 +204,4 @@ e/texmf/fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesky
 /cm/cmr7.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr10.pfb></usr/share/tex
 mf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/c
 mr12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on matching_portfolio.pdf (9 pages, 126997 bytes).
+Output written on matching_portfolio.pdf (9 pages, 126937 bytes).
