@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: matchedPortfolioCollection.R 1128 2007-08-09 18:16:56Z enos $
+## $Id: matchedPortfolioCollection.R 389 2007-01-10 04:28:44Z enos $
 ##
 ## Collection (list) of 'matchedPortfolio' objects.
 ##

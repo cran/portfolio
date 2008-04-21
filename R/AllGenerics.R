@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: AllGenerics.R 1128 2007-08-09 18:16:56Z enos $
+## $Id: AllGenerics.R 387 2007-01-10 04:14:02Z enos $
 ##
 ## All generic functions for the portfolio class.
 ##

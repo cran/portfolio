@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: prob.matrix.test.R 1128 2007-08-09 18:16:56Z enos $
+## $Id: prob.matrix.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests that ".prob.matrix" correctly forms probabilities from a matrix of
 ## distances

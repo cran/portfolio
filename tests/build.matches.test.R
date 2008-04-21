@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: build.matches.test.R 1128 2007-08-09 18:16:56Z enos $
+## $Id: build.matches.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## tests the .build.matches private function
 ##

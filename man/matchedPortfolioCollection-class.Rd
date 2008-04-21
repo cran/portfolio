@@ -21,7 +21,4 @@ No methods defined with class "matchedPortfolioCollection" in the signature.
 }
 
 \author{Jeff Enos \email{jeff@kanecap.com}}
-\examples{
-
-}
 \keyword{classes}

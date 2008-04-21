@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.expandData.test.R 1128 2007-08-09 18:16:56Z enos $
+## $Id: portfolio.expandData.test.R 346 2006-10-01 05:08:55Z enos $
 ##
 ## Tests the expandData method of class portfolio.
 ##

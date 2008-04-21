@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.mvLong.test.R 1128 2007-08-09 18:16:56Z enos $
+## $Id: portfolio.mvLong.test.R 410 2007-04-22 00:13:06Z enos $
 ##
 ## Tests for method "mvLong".
 ##
