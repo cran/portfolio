@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.R 411 2007-04-22 19:29:16Z enos $
+## $Id: portfolio.R 1311 2008-10-31 17:38:03Z enos $
 ##
 ## A more complex, full-featured portfolio object that includes
 ## shares, a notion of equity, and is better suited for use in
@@ -327,8 +327,8 @@ setMethod("+",
             }
             else{
               
-              w <- merge(subset(e1@shares, !is.na(shares)),
-                         subset(e2@shares, !is.na(shares)),
+              w <- merge(subset(e1@shares, !is.na(e1@shares$shares)),
+                         subset(e2@shares, !is.na(e2@shares$shares)),
                          suffixes = c(".e1", ".e2"), by = "id", all = TRUE)
               
 
@@ -340,7 +340,7 @@ setMethod("+",
 
               ## Remove entries that now have zero shares.
 
-              r@shares <- subset(r@shares, is.na(shares) | shares != 0)
+              r@shares <- r@shares[is.na(r@shares$shares) | r@shares$shares != 0,]
             }
             return(r)
           }

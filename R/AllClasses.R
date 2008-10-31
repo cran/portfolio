@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: AllClasses.R 411 2007-04-22 19:29:16Z enos $
+## $Id: AllClasses.R 1311 2008-10-31 17:38:03Z enos $
 ##
 ## Class definitions for the portfolio package.
 ##
@@ -105,7 +105,7 @@ setClass("portfolioBasic",
            if(!is.numeric(object@weights$weight)){
              return("Invalid class for weight column in weights slot: must be numeric")
            }
-           if(any(duplicated(data$id))){
+           if(any(duplicated(object@data$id))){
              return("Cannot have duplicate id's in the data slot")
            }
            if(any(duplicated(object@weights$id))){

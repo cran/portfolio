@@ -1,3 +1,7 @@
+Version: 0.4-4 (2008-10-31, released)
+
+	* Added new returns and financials columns to assay data.
+
 Version: 0.4-0 (2007-04-22, released)
 
 	* Refactored and improved matching facilities in the

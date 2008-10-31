@@ -75,7 +75,8 @@ library(portfolio)
 
 <<>>=
 data(assay)
-assay[c(1, 10, 100, 1000, 3000, 767),]
+assay[c(1407, 1873, 1058, 2453, 1833, 1390), c("id", "symbol", "name", "country", 
+  "currency", "price", "sector", "liq", "on.fl", "ret.0.3.m", "ret.0.6.m")]
 @ 
 
 The variables in the data frame follow:
@@ -116,7 +117,7 @@ The variables in the data frame follow:
   \Sexpr{length(table(assay[["sector"]]))} sectors in this data including
   Communications, Cyclicals, Energy, Financials and Technology.
   
-\item \texttt{liquidity} is a measure of the typical daily dollar
+\item \texttt{liq} is a measure of the typical daily dollar
   volume of trading in the security. We normalized it to be $N(0,1)$.
   
 \item \texttt{assay} is a TRUE/FALSE indicator of whether or not the
@@ -315,7 +316,7 @@ closely resemble those in \texttt{p} along the dimensions specified in
 the \texttt{covariates} argument:
 
 <<results=hide>>=
-p.m <- matching(p, covariates = c("country", "sector", "liquidity"))
+p.m <- matching(p, covariates = c("country", "sector", "liq"))
 @ 
 <<>>=
 summary(p.m)
@@ -347,13 +348,13 @@ Communications.  Finally, the exposure of \texttt{p} to the numeric
 variable liquidity:
 
 <<>>=
-exposure(p, exp.var = "liquidity")
+exposure(p, exp.var = "liq")
 @ 
 
 is quite close to \texttt{p.m}'s exposure to liquidity:
 
 <<>>=
-exposure(p.m, exp.var = "liquidity")
+exposure(p.m, exp.var = "liq")
 @
 
 Since we matched using more than one covariate, we shouldn't expect

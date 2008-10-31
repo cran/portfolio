@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: next.treatment.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: next.treatment.test.R 1313 2008-10-31 19:24:34Z enos $
 ##
 ## Tests for the matching method of portfolioBasic
 ##
@@ -15,7 +15,7 @@ load("next.treatment.test.RData")
 data(assay)
 
 x <- assay
-x <- assay[assay$country == "USA", c("symbol", "name", "sector", "liquidity", "on.fl")]
+x <- assay[assay$country == "USA", c("symbol", "name", "sector", "liq", "on.fl")]
 
 ## universe for test case includes all US stocks, 10 from the focus
 ## list, 10 identified as good matches by the matchit method, and 10
@@ -28,7 +28,7 @@ all.stocks <- c("76143", "18027", "14730", "6961", "6930", "69571", "71262",
 
 x <- x[all.stocks,]
 x$matches <- NA
-x$ps <- fitted(glm(on.fl ~ sector + liquidity, x, family = binomial("logit")))
+x$ps <- fitted(glm(on.fl ~ sector + liq, x, family = binomial("logit")))
 
 treatments <- character()
 

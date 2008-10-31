@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: matchit.test.R 389 2007-01-10 04:28:44Z enos $
+## $Id: matchit.test.R 1313 2008-10-31 19:24:34Z enos $
 ##
 ## Tests for the matching method of portfolioBasic
 ##
@@ -15,7 +15,7 @@ load("matchit.test.RData")
 data(assay)
 
 x <- assay
-x <- assay[assay$country == "USA", c("symbol", "name", "sector", "liquidity", "on.fl")]
+x <- assay[assay$country == "USA", c("symbol", "name", "sector", "liq", "on.fl")]
 
 ## universe for test case includes all US stocks, 10 from the focus
 ## list, 10 identified as good matches by the matchit method, and 10
@@ -37,7 +37,7 @@ for(i in names(x)){
 ## done preparing data, tests greedy algorithm of entire "matchit"
 ## function.
 
-test <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = x)
+test <- portfolio:::.matchit(on.fl ~ sector + liq, data = x)
 
 ## truth is a matrix
 
@@ -50,7 +50,7 @@ stopifnot(
 
 x.sub <- x[2:15,]
 
-test.3 <- portfolio:::.matchit(on.fl ~ sector + liquidity, data = x.sub)
+test.3 <- portfolio:::.matchit(on.fl ~ sector + liq, data = x.sub)
 
 stopifnot(
           all.equal(dimnames(test.3)[1], dimnames(truth.3)[1]),

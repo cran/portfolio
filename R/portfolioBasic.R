@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolioBasic.R 411 2007-04-22 19:29:16Z enos $
+## $Id: portfolioBasic.R 1311 2008-10-31 17:38:03Z enos $
 ##
 ## Basic portfolio class.
 ##
@@ -1050,7 +1050,7 @@ setMethod("+",
                 stop("portfolioBasic object must contain data slots with the same columns")
               }
               
-              d <- rbind(e1@data, subset(e2@data, ! id %in% e1@data$id))
+              d <- rbind(e1@data, e2@data[! e2@data$id %in% e1@data$id,])
               r@data <- d
               return(r)
             }

@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: tradelist.R 1131 2007-08-09 20:38:05Z enos $
+## $Id: tradelist.R 1311 2008-10-31 17:38:03Z enos $
 ##
 ## First pass at a trading system that enables daily trading
 ## at a given turnover rate.
@@ -1554,8 +1554,8 @@ setMethod("show",
                                           decreasing = TRUE),]
               
               cat("\nBest rank gain swaps:\n\n")
-              show(head(unique(subset(swaps.actual, id.enter != .dummy.id() &
-                                      id.exit != .dummy.id(),
+              show(head(unique(subset(swaps.actual, swaps.actual$id.enter != .dummy.id() &
+                                      swaps.actual$id.exit != .dummy.id(),
                                       select = swap.summary.cols)),
                         n = 5))
               
@@ -1567,8 +1567,8 @@ setMethod("show",
 
               cat("\n")
               cat("Worst rank gain swaps:\n\n")
-              show(head(unique(subset(swaps.actual, id.enter != .dummy.id() &
-                                      id.exit != .dummy.id(),
+              show(head(unique(subset(swaps.actual, swaps.actual$id.enter != .dummy.id() &
+                                      swaps.actual$id.exit != .dummy.id(),
                                       select = swap.summary.cols)),
                         n = 5))
             }
