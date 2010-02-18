@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: map.market.R 346 2006-10-01 05:08:55Z enos $
+## $Id: map.market.R 1327 2009-06-11 13:14:09Z enos $
 ##
 ## Plot a "map" of a given portfolio, based on the Map of the Market
 ##
@@ -71,7 +71,7 @@ map.market <- function(id, area, group, color,
     data$color <- data$color * 1/max(abs(data$color))
   }
   else{
-    data$color <- data$color * 1/scale
+    data$color <- sapply(data$color, function(x) {if(x/scale > 1) 1 else if(-1 > x/scale) -1 else x/scale})
   }
   
   ## Start dividing data up into groups.
@@ -274,8 +274,13 @@ map.market <- function(id, area, group, color,
   l.x <- (0:(legend.ncols-1))/(legend.ncols)
   l.y <- unit(0.25, "npc")
   l.cols <- color.ramp.rgb(seq(-1, 1, by = 2/(legend.ncols-1)))
-
-  l.end <- max(abs(data$color.orig))
+ 
+  if(is.null(scale)){
+    l.end <- max(abs(data$color.orig))
+  }
+  else{
+    l.end <- scale
+  }
   
   top.list <-
     gList(textGrob(label = main, y = unit(0.7, "npc"),

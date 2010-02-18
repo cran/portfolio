@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: weight.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: weight.test.R 1625 2010-02-18 19:44:29Z enos $
 ##
 ## Tests for the weight function.
 ##
@@ -18,7 +18,7 @@ trial.0 <- try(weight(x, in.var = "foo", type = "equal",
                       size = 2, sides = c("long","short")), silent = TRUE)
 
 if(class(trial.0) == "try-error"){
-  stopifnot(as.logical(grep("Error.*in\.var.\%in\%.names",trial.0[1])))
+  stopifnot(isTRUE(as.logical(grep("Error.*in\\.var.\\%in\\%.names",trial.0[1]))))
 }
 
 ## class of x[[in.var]] is not numeric
@@ -27,7 +27,7 @@ trial.1 <- try(weight(x, in.var = "alpha.num", type = "equal",
                       size = 0, sides = c("long","short")), silent = TRUE) 
 
 if(class(trial.1) == "try-error"){
-  stopifnot(as.logical(grep("Error.*is\.numeric", trial.1[1])))
+  stopifnot(isTRUE(as.logical(grep("Error.*is\\.numeric", trial.1[1]))))
 }
 
 ## Some long + short weight formation tests:

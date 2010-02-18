@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.create.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: portfolio.create.test.R 1625 2010-02-18 19:44:29Z enos $
 ##
 ## Tests "create" method of "portfolio" class
 ##
@@ -31,5 +31,5 @@ trial.0 <- try(
                )
 
 if(class(trial.0) == "try-error"){
-  stop("\"create\" method failed to update \"shares\" data.frame!")
+  stop("create method failed to update shares data.frame!")
 }

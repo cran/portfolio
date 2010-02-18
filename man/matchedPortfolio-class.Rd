@@ -28,6 +28,15 @@ Objects can be created by calls of the form \code{new("matchedPortfolio", ...)}.
     \item{\code{matches}:}{Object of class \code{"matrix"} with a column
       for each matched portfolio.
     }
+    \item{\code{method}:}{Object of class \code{"character"} specifying
+      the matching method used to generate the matched portfolio.
+    }
+    \item{\code{omitted.control}:}{Object of class \code{"numeric"}
+      containing the number of observations omitted from the control.
+    }
+    \item{\code{omitted.treatment}:}{Object of class \code{"numeric"}
+      containing the number of observations omitted from the treatment.
+    }
   }
 }
 

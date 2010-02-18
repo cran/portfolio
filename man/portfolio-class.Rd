@@ -71,20 +71,21 @@ Objects can be created by calls of the form \code{new("portfolio", ...)}.
     \item{\code{weight.style}:}{Object of class \code{"character"}
     specifying how to calculate weights in this portfolio.  Valid
     entries are:
-    \begin{itemize}
-    \item \code{"sides.separate"}: The default.  Calculate weight of a
-    position with respect to the total market value of positions on the
-    same side.
-    \item \code{"long.tmv"}: Calculate weight of a
-    position with respect to the total market value of long positions.
-    \item \code{"short.tmv"}: Calculate weight of a
-    position with respect to the (positive) total market value of short
-    positions.
-    \item \code{"reference.equity"}: Calculate weight of a position
-    relative to the reference equity in the \code{equity} slot.  The
-    \code{equity} slot must contain a numeric vector of length 1 for
-    this style.
-    \end{itemize}
+
+    \itemize{
+      \item \code{"sides.separate"}: The default.  Calculate weight of a
+      position with respect to the total market value of positions on the
+      same side.
+      \item \code{"long.tmv"}: Calculate weight of a
+      position with respect to the total market value of long positions.
+      \item \code{"short.tmv"}: Calculate weight of a
+      position with respect to the (positive) total market value of short
+      positions.
+      \item \code{"reference.equity"}: Calculate weight of a position
+      relative to the reference equity in the \code{equity} slot.  The
+      \code{equity} slot must contain a numeric vector of length 1 for
+      this style.
+    }
     }
     \item{\code{ret.var}:}{Object of class \code{"character"} containing
     the name of the column in the "data" slot to be used as the return

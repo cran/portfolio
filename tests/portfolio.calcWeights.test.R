@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolio.calcWeights.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: portfolio.calcWeights.test.R 1625 2010-02-18 19:44:29Z enos $
 ##
 ## Tests "calcWeights" method of "portfolio"
 ##
@@ -56,5 +56,5 @@ names(p.2@data)[pmatch("id", names(p.2@data))] <- "ric"
 trial.1 <- try(calcShares(p.2), silent = TRUE)
 
 if(class(trial.1) == "try-error"){
-  stopifnot(as.logical(grep("\'by\'.*valid.column", trial.1[1])))
+  stopifnot(isTRUE(as.logical(grep("\\'by\\'.*valid.column", trial.1[1]))))
 }

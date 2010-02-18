@@ -31,8 +31,7 @@ map.market(id, area, group, color,
   \item{print}{ An object of class \code{logical} indicating whether the
     map should be drawn. }
 }
-\author{Kyle Campbell \email{kyle.w.campbell@williams.edu} and Jeff Enos
-\email{jeff@kanecap.com}}
+\author{Jeff Enos \email{jeff@kanecap.com}}
 \examples{
 data(dow.jan.2005)
 map.market(id    = dow.jan.2005$symbol,

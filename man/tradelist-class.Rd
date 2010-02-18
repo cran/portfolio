@@ -41,6 +41,10 @@
       containing the name of the column in the \code{data} slot to be
       used as a unique identifier. }
 
+    \item{\code{price.var}:}{Object of class \code{"character"}
+      specifying the column in the \code{data} slot to be used as the
+      reference price.  Defaults to \code{price.usd}.}
+    
     \item{\code{candidates}:}{Object of class \code{"data.frame"}
       containing one row for each candidate trade.}
 
@@ -112,6 +116,10 @@
     \item{\code{tca}:}{Object of class \code{"character"} expressing
       whether or not to use trade cost adjustment.}
 
+    \item{\code{rank.gain.min}:}{Object of class \code{"numeric"}
+      specifying the minimum amount of difference between two trades'
+      rank required in order for the pair to be considered as a swap.}
+    
     \item{\code{target.equity}:}{Object of class \code{"numeric"}
       expressing the unsigned market value of the target portfolio.}
 
@@ -129,6 +137,9 @@
       supplementary information about the "tradelist".  Must contain an
       "id" column, a "price.usd" column, a "volume" column, and a column
       named after each element listed in "sorts".}
+
+    \item{\code{verbose}:}{Object of class \code{"logical"} controlling
+      whether methods on this object should be verbose.  Defaults to FALSE.}
   }
 }
 \section{Methods}{

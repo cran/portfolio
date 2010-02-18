@@ -1,3 +1,8 @@
+Version: 0.4-5 (2010-02-18, released)
+
+	* Fixed bug in map.market where use of particular scale values caused
+	failure.  Thanks to Luke Vilnis for supplying this patch.
+
 Version: 0.4-4 (2008-10-31, released)
 
 	* Added new returns and financials columns to assay data.

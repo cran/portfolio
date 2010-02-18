@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## $Id: portfolioBasic.contribution.test.R 346 2006-10-01 05:08:55Z enos $
+## $Id: portfolioBasic.contribution.test.R 1625 2010-02-18 19:44:29Z enos $
 ##
 ## Tests for the portfolioBasic class.
 ##
@@ -17,7 +17,7 @@ trial.0 <- try(
                )
 
 if(class(trial.0) == "try-error"){
-  stopifnot(as.logical(grep("Error.*contrib\.var.\%in\%.names",trial.0[1])))
+  stopifnot(isTRUE(as.logical(grep("Error.*contrib\\.var.\\%in\\%.names",trial.0[1]))))
 }
 
 ## stopifnot(
