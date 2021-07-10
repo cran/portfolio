@@ -1,5 +1,5 @@
 830d8ab2e81f5427dc52cd6f3d0b5a04 *ChangeLog
-0bb4786d40ea3edc7bdec3c3eefee3cd *DESCRIPTION
+f9b18c0bdd060c355c4e582b5dc14a86 *DESCRIPTION
 d3d0b5ba508924bd20fd31cd5e17becb *NAMESPACE
 db4eae72bde0183479744908418467f4 *R/AllClasses.R
 73df6ef12d12a842b0aa26514736b0c8 *R/AllGenerics.R
@@ -19,7 +19,7 @@ f93c83bfa0c07386a883fe776931c623 *R/portfolioBasic.R
 c310c66d22b86013d3b38985635dce73 *R/weight.R
 0acc35671ebdfdb397b1483bc25a12e2 *README.md
 dfc271155a99d2545dcc44433596ad75 *THANKS
-c1429253617f19a17a6f4f68402b522f *build/vignette.rds
+1fab121e806847f137c2df9727de049c *build/vignette.rds
 1d492df97a1f5a92c3bb54b36c5e12d0 *data/assay.RData
 009327bca18333d18e3ea3ac1bf2327f *data/dow.jan.2005.RData
 0f92e80afeb6839938218f837f9b2d70 *data/global.2004.RData
@@ -27,13 +27,13 @@ eabe2e1868b29f734dfef49d2b51f524 *demo/00Index
 a61c326b36c3f42899b94afc8f1c8350 *demo/getYahooData.R
 0cef2cdad356039080ef7b70de51cf3f *inst/doc/matching_portfolio.R
 ea3b6b6444691e9ac715577874ddcf0e *inst/doc/matching_portfolio.Rnw
-8431486a4e201a986eafbf2bcda2a9c7 *inst/doc/matching_portfolio.pdf
+961b079e5018ee1d043daddab01ba63a *inst/doc/matching_portfolio.pdf
 5d1a19c08784d41574f88ce65d994f72 *inst/doc/portfolio.R
 7debb619d4e96206cb59a31b54f6699c *inst/doc/portfolio.Rnw
-4f81c29f9a1ca8f4ca51041b2c3e13df *inst/doc/portfolio.pdf
+096154807ec43c7447b1551f6859e3e1 *inst/doc/portfolio.pdf
 679ba6c76825196781f75ccb67c5d9c8 *inst/doc/tradelist.R
 1e4f4930c0059d1aad61a80a382e8f3d *inst/doc/tradelist.Rnw
-5c2e581536594a96f7132f096342295a *inst/doc/tradelist.pdf
+83576a0d6a4b014601c9623e651e9beb *inst/doc/tradelist.pdf
 196e8ceb609cf98ec8fc4b656d034e43 *man/assay.Rd
 a6ef9e800bf1de81e3b1a03b95221c06 *man/contribution-class.Rd
 b53a37290b24e135bebba39616819807 *man/dow.jan.2005.Rd
@@ -53,9 +53,6 @@ e2883de27e507cfead1a14c9839f1618 *tests/build.matches.test.R
 80de685d68e0e9ad28f6b3e08635e868 *tests/classes.test.R
 1a820c85327e8bd688c57819be6ac37b *tests/df.category.mean.test.R
 c6d3cef319688f60ce90f3058ca2b200 *tests/df.category.mean.test.RData
-3f82e4fc71e4b5f18d20c1d177f954ab *tests/map.market.test.R
-d749b9a5c2753d3278252a73d0db66da *tests/map.market.test.RData
-52069ff8521678a7ab5dc8934386f98e *tests/map.market.test.gt363.RData
 fff9b2c5e7e94d8e62cf03d434e73e97 *tests/matchit.test.R
 b21ac459af96103595609659bc02c1d0 *tests/matchit.test.RData
 a1c5e3a83320f44ab34ab5769a2f80bc *tests/nearest.multiple.test.R
