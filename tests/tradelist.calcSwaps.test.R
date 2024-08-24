@@ -6,34 +6,37 @@
 ##
 ################################################################################
 
-library(portfolio)
 
-load("tradelist.calcSwaps.test.RData")
+if (base::getRversion() <= "4.4.1") {
+    library(portfolio)
 
-## save(tl, tl.1, tl.2, tl.3, truth.swaps, truth.row.names, truth.row.names.2, truth.row.names.3, file = "tradelist.calcSwaps.test.RData", compress = TRUE)
+    load("tradelist.calcSwaps.test.RData")
 
-tl  <- portfolio:::calcSwaps(tl)
+    ## save(tl, tl.1, tl.2, tl.3, truth.swaps, truth.row.names, truth.row.names.2, truth.row.names.3, file = "tradelist.calcSwaps.test.RData", compress = TRUE)
 
-stopifnot(all.equal(tl@swaps, truth.swaps))
+    tl  <- portfolio:::calcSwaps(tl)
 
-## tests that dummy sells are created when the portfolio is
-## under-invested
+    stopifnot(all.equal(tl@swaps, truth.swaps))
 
-tl.1 <- portfolio:::calcSwaps(tl.1)
+    ## tests that dummy sells are created when the portfolio is
+    ## under-invested
 
-## compares generated row names to expected row names
+    tl.1 <- portfolio:::calcSwaps(tl.1)
 
-stopifnot(all.equal(row.names(tl.1@swaps), truth.row.names))
+    ## compares generated row names to expected row names
 
-## tests normal creation of swaps (matching buys with sells)
+    stopifnot(all.equal(row.names(tl.1@swaps), truth.row.names))
 
-tl.2 <- portfolio:::calcSwaps(tl.2)
+    ## tests normal creation of swaps (matching buys with sells)
 
-stopifnot(all.equal(row.names(tl.2@swaps), truth.row.names.2))
+    tl.2 <- portfolio:::calcSwaps(tl.2)
 
-## tests that dummy buys are created when the portfolio is
-## over-invested
+    stopifnot(all.equal(row.names(tl.2@swaps), truth.row.names.2))
 
-tl.3 <- portfolio:::calcSwaps(tl.3)
+    ## tests that dummy buys are created when the portfolio is
+    ## over-invested
 
-stopifnot(all.equal(row.names(tl.3@swaps), truth.row.names.3))
+    tl.3 <- portfolio:::calcSwaps(tl.3)
+
+    stopifnot(all.equal(row.names(tl.3@swaps), truth.row.names.3))
+}

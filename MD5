@@ -1,5 +1,5 @@
 830d8ab2e81f5427dc52cd6f3d0b5a04 *ChangeLog
-f9b18c0bdd060c355c4e582b5dc14a86 *DESCRIPTION
+1ebc2e4941b93e0e5cac0c66bb6a4843 *DESCRIPTION
 d3d0b5ba508924bd20fd31cd5e17becb *NAMESPACE
 db4eae72bde0183479744908418467f4 *R/AllClasses.R
 73df6ef12d12a842b0aa26514736b0c8 *R/AllGenerics.R
@@ -15,11 +15,11 @@ b8f6dc6cc88dba1c2c2cecf0080be30d *R/performance.R
 bcfa5dd8d790931ded550a7ff99effb6 *R/portfolio.R
 f93c83bfa0c07386a883fe776931c623 *R/portfolioBasic.R
 47970a6f2c9ffff57e592981c0303ac7 *R/tradelist.R
-2437d2326f66fabff478cd1492e19c2f *R/trellis.multiplot.R
+4d8766cd67d5bdf102c7e25fe936b474 *R/trellis.multiplot.R
 c310c66d22b86013d3b38985635dce73 *R/weight.R
 0acc35671ebdfdb397b1483bc25a12e2 *README.md
 dfc271155a99d2545dcc44433596ad75 *THANKS
-1fab121e806847f137c2df9727de049c *build/vignette.rds
+c201e02da39fa8e01725f250ceeb616a *build/vignette.rds
 1d492df97a1f5a92c3bb54b36c5e12d0 *data/assay.RData
 009327bca18333d18e3ea3ac1bf2327f *data/dow.jan.2005.RData
 0f92e80afeb6839938218f837f9b2d70 *data/global.2004.RData
@@ -27,13 +27,13 @@ eabe2e1868b29f734dfef49d2b51f524 *demo/00Index
 a61c326b36c3f42899b94afc8f1c8350 *demo/getYahooData.R
 0cef2cdad356039080ef7b70de51cf3f *inst/doc/matching_portfolio.R
 ea3b6b6444691e9ac715577874ddcf0e *inst/doc/matching_portfolio.Rnw
-961b079e5018ee1d043daddab01ba63a *inst/doc/matching_portfolio.pdf
+1ab292226db49a7814027921961948f2 *inst/doc/matching_portfolio.pdf
 5d1a19c08784d41574f88ce65d994f72 *inst/doc/portfolio.R
 7debb619d4e96206cb59a31b54f6699c *inst/doc/portfolio.Rnw
-096154807ec43c7447b1551f6859e3e1 *inst/doc/portfolio.pdf
+76fb3c46d8135fa2940844f7617a4c3f *inst/doc/portfolio.pdf
 679ba6c76825196781f75ccb67c5d9c8 *inst/doc/tradelist.R
 1e4f4930c0059d1aad61a80a382e8f3d *inst/doc/tradelist.Rnw
-83576a0d6a4b014601c9623e651e9beb *inst/doc/tradelist.pdf
+34e918683dc850231868e302ac1e7c2a *inst/doc/tradelist.pdf
 196e8ceb609cf98ec8fc4b656d034e43 *man/assay.Rd
 a6ef9e800bf1de81e3b1a03b95221c06 *man/contribution-class.Rd
 b53a37290b24e135bebba39616819807 *man/dow.jan.2005.Rd
@@ -46,7 +46,7 @@ dd5bc968f87715be8fc6f562568c0b04 *man/global.2004.Rd
 b8cad7e07136e2f6630d4be1f5f6cf71 *man/portfolio-class.Rd
 9aaf084a95dc0deff908a2ed8c8fabea *man/portfolio-package.Rd
 74c4ec13a091b4f87001a6c54efd6a08 *man/portfolioBasic-class.Rd
-0b1f11c9c3a2807314d3220ebd8ce513 *man/tradelist-class.Rd
+65423ac7f3c17315b88b2528137f4cda *man/tradelist-class.Rd
 42be713ab52ccd836087a290b2e73720 *man/trades-class.Rd
 7341a5e5ecad2386cc1759f8ee195870 *man/weight.Rd
 e2883de27e507cfead1a14c9839f1618 *tests/build.matches.test.R
@@ -105,7 +105,7 @@ f92523e3c4d58c78ca429998b6d6e47b *tests/tradelist.calcActual.test.RData
 178f2d27365de8d4ff0e1e53b5c10f62 *tests/tradelist.calcChunksActual.test.RData
 9ec6ed1260f3bd31985a8bff91973859 *tests/tradelist.calcRanks.test.R
 a20b3fa1e77ca3f7b70dd8d67574ace7 *tests/tradelist.calcRanks.test.RData
-c55b39931aad85bcacfcc9b26d2ad9a5 *tests/tradelist.calcSwaps.test.R
+53e663158514158688ebac7b610568bc *tests/tradelist.calcSwaps.test.R
 18463d46649852da0e9614a1571fe3bc *tests/tradelist.calcSwaps.test.RData
 1f9afdd06c463e8181eb5a6db170259b *tests/tradelist.calcSwapsActual.test.R
 e304e4920f82c68bac574944c3e2f2cf *tests/tradelist.calcSwapsActual.test.RData
